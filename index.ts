@@ -1,10 +1,13 @@
-import { Telegraf } from "telegraf";
+import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env" });
 const text = ``;
 const TOKEN = String(process.env.TOKEN);
 const bot = new Telegraf(TOKEN);
+
+const newWizart = new Composer();
+const menuSchema = new Scenes.WizardScene("sceneWizard", newWizart);
 bot.start((ctx) => {
   const name = ctx.update.message.from.first_name;
   const id = ctx.update.message.from.id;
@@ -46,7 +49,9 @@ bot.action("money", async (ctx) => {
   const text = `ℹ️ <i>Agar biror bosqichda xatoga yo'l qo'ysangiz - loyiha yaratishning barcha bosqichlaridan o'ting.
   Keyin har qanday sozlamani o'zgartirishingiz mumkin.</i>
   
-  <b>Yangi loyiha nomini kiriting:</b>`;
+  <b>Yangi loyiha nomini kiriting: 
+  Misol => Loyiha:Nomi
+  </b>`;
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
   const messageId: number = Number(
@@ -115,32 +120,7 @@ bot.action("cancel", async (ctx) => {
   // ctx.telegram.editMessageReplyMarkup(id,messageId,,);
   // await ctx.deleteMessage();
 });
-bot.on("text", (ctx) => {
-  console.log(ctx.update.message);
-  const id = ctx.update.message.from.id;
-  const text = ctx.update.message.text;
-  const updateId = ctx.update.message.from;
-  console.log(updateId);
-  const messageId = ctx.update.message.message_id;
-  const textMain = `💁‍♀️ Loyiha: ${text}
 
-  Endi birinchi resursingizni ulang.
-  
-  Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
-  
-  Nimani bog'laysiz?`;
-  ctx.telegram.sendMessage(id, textMain, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "Shaxsiy kanal", callback_data: "channel" },
-          { text: "Shaxsiy guruh", callback_data: "group" },
-        ],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
-      ],
-    },
-  });
-});
 bot.hears(/P|proyektlar/g, (ctx) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
@@ -166,6 +146,36 @@ bot.hears(/Y|yordam/g, (ctx) => {
       parse_mode: "HTML",
     }
   );
+});
+
+bot.on("text", (ctx) => {
+  console.log(ctx.update.message);
+  const id = ctx.update.message.from.id;
+  let text = ctx.update.message.text;
+  if (text.includes("loyiha:")) {
+    text = text.split(":")[1];
+    const updateId = ctx.update.message.from;
+    console.log(updateId);
+    const messageId = ctx.update.message.message_id;
+    const textMain = `💁‍♀️ Loyiha: ${text}
+
+  Endi birinchi resursingizni ulang.
+  
+  Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
+  
+  Nimani bog'laysiz?`;
+    ctx.telegram.sendMessage(id, textMain, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "Shaxsiy kanal", callback_data: "channel" },
+            { text: "Shaxsiy guruh", callback_data: "group" },
+          ],
+          [{ text: "Bekor qilish", callback_data: "cancel" }],
+        ],
+      },
+    });
+  }
 });
 bot.on("forward_date", (ctx) => {
   console.log(ctx);
