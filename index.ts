@@ -190,6 +190,7 @@ option.action("channel", async (ctx: any) => {
       ],
     },
   });
+  return ctx.wizard.next();
 });
 option.action("back", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
@@ -218,12 +219,19 @@ option.action("back", async (ctx: any) => {
   });
   // return ctx.wizard.back();
 });
+
+const Connection = new Composer();
+Connection.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  console.log(ctx.update);
+});
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
   newWizart,
   newProyekt,
   proyektOption,
-  option
+  option,
+  Connection
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);
