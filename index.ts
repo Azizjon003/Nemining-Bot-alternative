@@ -1,6 +1,12 @@
 import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
-
+interface forward_from {
+  id: bigint;
+  title: string;
+  is_bot: boolean;
+  username: string;
+  first_name: string;
+}
 dotenv.config({ path: ".env" });
 
 const TOKEN = String(process.env.TOKEN);
@@ -223,7 +229,17 @@ option.action("back", async (ctx: any) => {
 const Connection = new Composer();
 Connection.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
+  const messageId = ctx.update.message.message_id;
   console.log(ctx.update);
+  const forward = ctx.update.message.forward_from_chat as forward_from;
+
+  if (!forward.username) {
+    ctx.deleteMessage(messageId);
+    ctx.telegram.sendMessage(
+      id,
+      "Kanalni ulamoqchi bo'lyapsizmi ulamoqchi bo'lyapsizmi sizning kallangiz bormi?"
+    );
+  }
 });
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
