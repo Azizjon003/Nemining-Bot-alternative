@@ -1,5 +1,9 @@
 import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
+import cli from "cli-color";
+const db = require("./model/index");
+const User = db.user;
+
 interface forward_from {
   id: bigint;
   title: string;
@@ -8,6 +12,7 @@ interface forward_from {
   first_name: string;
 }
 dotenv.config({ path: ".env" });
+require("./model");
 
 const TOKEN = String(process.env.TOKEN);
 
@@ -254,8 +259,24 @@ const stage: any = new Scenes.Stage([menuSchema]);
 bot.use(session());
 bot.use(stage.middleware());
 bot.start(async (ctx: any) => {
-  const name = ctx.update.message.from.first_name;
+  const name =
+    ctx.update.message.from.username || ctx.update.message.from.first_name;
   const id = ctx.update.message.from.id;
+
+  const user = await User.findOne({
+    where: {
+      telegramId: id,
+    },
+  });
+  if (!User) {
+    const data = await User.create({
+      username: name,
+      telegramId: id,
+    });
+  } else {
+    await User.update({ username: name }, { where: { telegramId: id } });
+  }
+
   ctx.telegram.sendMessage(
     id,
     `🖐 Xush kelibsiz, ${name}! Kanalni monetizatsiya qilish haqida o'ylab ko'rganmisiz? Yoki xayr-ehsonlarni ulashni xohlaysizmi? :)`,
