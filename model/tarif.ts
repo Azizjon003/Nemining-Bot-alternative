@@ -9,19 +9,19 @@ const tarif = (sequelize: any, DataTypes: any) => {
       },
       name: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       expires: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
       },
       price: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       currency: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       userId: {
         type: DataTypes.INTEGER,

@@ -1,6 +1,7 @@
 import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
-import cli from "cli-color";
+import cli, { xterm } from "cli-color";
+import fs from "fs";
 const db = require("./model/index");
 const User = db.user;
 const proyekt = db.proyekt;
@@ -37,7 +38,7 @@ newWizart.hears("Yordam", async (ctx: any) => {
 newWizart.hears("Proyektlar", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  console.log(user);
+  // console.log(user);
   if (!user) {
     ctx.telegram.sendMessage(id, `Siz ro'yhatdan o'tmagansiz!`, {
       parse_mode: "HTML",
@@ -47,7 +48,7 @@ newWizart.hears("Proyektlar", async (ctx: any) => {
   const userProyekt = await proyekt.findAll({
     where: { userId: user.id, activ: true },
   });
-  console.log(userProyekt);
+  // console.log(userProyekt);
   for (let i = 0; i < userProyekt.length; i++) {
     text = String(userProyekt[i].dataValues.name) + "\n" + text;
   }
@@ -113,7 +114,7 @@ proyektOption.action("money", async (ctx: any) => {
     },
   });
   return ctx.wizard.next({
-    stage: "E kallangga ",
+    state: "E kallangga ",
   });
 });
 proyektOption.action("donat", async (ctx: any) => {
@@ -132,7 +133,7 @@ proyektOption.action("donat", async (ctx: any) => {
   return ctx.wizard.next();
 });
 proyektOption.action("cancel", async (ctx: any) => {
-  console.log(ctx);
+  // console.log(ctx);
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
   const messageId = ctx.update.callback_query.message?.message_id;
@@ -161,7 +162,6 @@ proyektOption.action("cancel", async (ctx: any) => {
 });
 const option = new Composer();
 option.on("text", async (ctx: any) => {
-  console.log(ctx);
   const message = ctx.update.message.text;
   const id = ctx.update.message.from.id;
   const textMain = `💁‍♀️ Loyiha: <i>${message}</i>
@@ -190,7 +190,7 @@ option.on("text", async (ctx: any) => {
   });
 });
 option.action("cancel", async (ctx: any) => {
-  console.log(ctx);
+  // console.log(ctx);
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
   const messageId = ctx.update.callback_query.message?.message_id;
@@ -234,7 +234,7 @@ option.action("channel", async (ctx: any) => {
       ],
     },
   });
-  console.log(ctx.stage);
+  // console.log(ctx.stage);
   return ctx.wizard.next({});
 });
 
@@ -271,17 +271,18 @@ const Connection = new Composer();
 Connection.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
-  console.log(ctx.update);
+  // console.log(ctx.update);
   const forward = ctx.update.message.forward_from_chat;
 
   if (forward.username) {
     await ctx.deleteMessage(messageId);
-    await ctx.telegram.sendMessage(
+    return await ctx.telegram.sendMessage(
       id,
       "Ommaviy Kanalni ulay olmaysiz iltimos shaxsiy kanalni ulang"
     );
   } else {
     await ctx.deleteMessage(messageId);
+    // console.log(ctx.update.message);
     const user = await User.findOne({
       where: {
         telegramId: id,
@@ -296,9 +297,12 @@ Connection.on("text", async (ctx: any) => {
       order: [["createdAt", "DESC"]],
     });
     const proyektId = proyektOp[0].dataValues.id;
-    const channelData = await Channel.findOne({ where: { proyektId } });
-    if (!channelData) {
-      return ctx.telegram.sendMessage(
+    // console.log(proyektId);
+    const channelData = await Channel.findOne({
+      where: { name: forward.title, userId: user.id, activ: true },
+    });
+    if (channelData.proyektId) {
+      return await ctx.telegram.sendMessage(
         id,
         "Bu kanal boshqa loyihaga ulangan,Boshqa kanalni ulashingiz mumkun"
       );
@@ -316,7 +320,6 @@ Connection.on("text", async (ctx: any) => {
     const data = await Channel.findOne({
       where: { name: forward.title },
     });
-    console.log(data);
     if (data) {
       await ctx.telegram.sendMessage(
         id,
@@ -337,13 +340,99 @@ Connection.on("text", async (ctx: any) => {
     }
   }
 });
+Connection.action("newTarif", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const dataArr = JSON.parse(fs.readFileSync("./currency.json", "utf-8"));
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Valyutani tanlang",
+    {
+      reply_markup: {
+        inline_keyboard: dataArr,
+      },
+    }
+  );
+  return ctx.wizard.next();
+});
+
+const tarif = new Composer();
+tarif.on("callback_query", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const data = ctx.update.callback_query.data;
+  const user = await User.findOne({ telegramId: id, activ: true });
+  const proyektOp = await proyekt.findAll({
+    where: {
+      userId: user.id,
+      activ: true,
+    },
+    order: [["createdAt", "DESC"]],
+  });
+  const proyektId = proyektOp[0].dataValues.id;
+  const tarif = await Tarif.create({
+    userId: user.id,
+    proyektId,
+    currency: data,
+  });
+  if (tarif) {
+    await ctx.telegram.editMessageText(
+      id,
+      messageId,
+      updateId,
+      "2/5 Tarif nomini kiriting"
+    );
+    return ctx.wizard.next();
+  }
+});
+
+const tarifName = new Composer();
+tarifName.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const messageId = ctx.update.message.message_id;
+  const text = ctx.update.message.text;
+  const user = await User.findOne({ telegramId: id, activ: true });
+  const tarifOp = await Tarif.findAll({
+    where: { userId: id },
+    order: [["createdAt", "DESC"]],
+  });
+  const tarifId = tarifOp[0].dataValues.id;
+  const tarif = await Tarif.update(
+    {
+      name: text,
+    },
+    {
+      where: {
+        id: tarifId,
+      },
+    }
+  );
+  await ctx.telegram.sendMessage(
+    id,
+    `Tarif nomi muvaffaqiyatli saqlandi ${text}\n Tarifga `,
+    {
+      reply_markup: {
+        inline_keyboard: [],
+      },
+    }
+  );
+});
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
   newWizart,
   newProyekt,
   proyektOption,
   option,
-  Connection
+  Connection,
+  tarif
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);
@@ -422,7 +511,6 @@ bot.on("my_chat_member", async (ctx: any) => {
       type: chatType,
       userId: user.id,
     });
-    console.log(chanel);
   }
 });
 console.log("Bot is running");

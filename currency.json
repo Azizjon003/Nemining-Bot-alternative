@@ -1,0 +1,32 @@
+[
+  [
+    {
+      "text": "💵 USD",
+      "callback_data": "USD"
+    },
+    {
+      "text": "🇷🇺 RUBL",
+      "callback_data": "RUBL"
+    },
+    {
+      "text": "💶 EUR",
+      "callback_data": "EUR"
+    }
+  ],
+  [
+    {
+      "text": " 🇺🇿 USZ",
+      "callback_data": "USZ"
+    },
+    {
+      "text": "🇰🇿 KZT",
+      "callback_data": "KZT"
+    }
+  ],
+  [
+    {
+      "text": "Loyihani bekor qilish",
+      "callback_data": "cancel"
+    }
+  ]
+]
