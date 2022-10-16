@@ -384,6 +384,7 @@ tarif.on("callback_query", async (ctx: any) => {
     proyektId,
     currency: data,
   });
+  console.log(tarif);
   if (tarif) {
     await ctx.telegram.editMessageText(
       id,
@@ -402,10 +403,17 @@ tarifName.on("text", async (ctx: any) => {
   const text = ctx.update.message.text;
   const user = await User.findOne({ telegramId: id, activ: true });
   const tarifOp = await Tarif.findAll({
-    where: { userId: id },
+    where: { userId: user.id },
     order: [["createdAt", "DESC"]],
   });
-  const tarifId = tarifOp[0].dataValues.id;
+  console.log(tarifOp);
+  const tarifId = tarifOp[0]?.dataValues.id;
+  if (!tarifId) {
+    return await ctx.telegram.sendMessage(
+      id,
+      "Tarif rejasini yaratishda xatolik yuz berdi"
+    );
+  }
   const tarif = await Tarif.update(
     {
       name: text,
@@ -435,6 +443,7 @@ tarifName.on("text", async (ctx: any) => {
       },
     }
   );
+  return ctx.wizard.next();
 });
 const currency = new Composer();
 
@@ -442,24 +451,72 @@ currency.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
   const text = ctx.update.message.text;
-  if (text.isNumber()) {
+  if (!Number(text)) {
     return await ctx.telegram.sendMessage(id, "Iltimos son kiriting");
   }
+  console.log(cli.red(text));
   const user = await User.findOne({ telegramId: id, activ: true });
   const tarifOp = await Tarif.findAll({
-    where: { userId: id },
+    where: { userId: user.id },
     order: [["createdAt", "DESC"]],
   });
   const tarifId = tarifOp[0].dataValues.id;
-  const tarif = await Tarif.update({
-    price: text,
-  });
+
+  if (!tarifId) {
+    return await ctx.telegram.sendMessage(
+      id,
+      "Tarif rejasini yaratishda xatolik yuz berdi"
+    );
+  }
+  console.log(tarifId);
+  const tarif = await Tarif.update(
+    {
+      price: text,
+    },
+    {
+      where: {
+        id: tarifId,
+      },
+    }
+  );
+
   const dataArr = JSON.parse(fs.readFileSync("./date.json", "utf-8"));
+  console.log(dataArr);
   await ctx.telegram.sendMessage(
     "Tarif summasi muvaffaqiyatli saqlandi,Siz Kerakli vaqtni tanlang",
     {
       reply_markup: {
         inline_keyboard: dataArr,
+      },
+    }
+  );
+});
+
+const description = new Composer();
+
+description.on("callback_query", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const data = ctx.update.callback_query.data;
+  const user = await User.findOne({ telegramId: id, activ: true });
+  const tarifOp = await Tarif.findAll({ where: { userId: user.id } });
+  const tarifId = tarifOp[0].dataValues.id;
+  if (!tarifId) {
+    return await ctx.telegram.sendMessage(
+      id,
+      "Tarif rejasini yaratishda xatolik yuz berdi"
+    );
+  }
+  const tarif = await Tarif.update(
+    {
+      time: data,
+    },
+    {
+      where: {
+        id: tarifId,
       },
     }
   );
@@ -471,7 +528,9 @@ const menuSchema: any = new Scenes.WizardScene(
   proyektOption,
   option,
   Connection,
-  tarif
+  tarif,
+  tarifName,
+  currency
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);
