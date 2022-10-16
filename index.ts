@@ -112,7 +112,9 @@ proyektOption.action("money", async (ctx: any) => {
       inline_keyboard: [[{ text: "Bekor qilish", callback_data: "cancel" }]],
     },
   });
-  return ctx.wizard.next();
+  return ctx.wizard.next({
+    stage: "E kallangga ",
+  });
 });
 proyektOption.action("donat", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
@@ -159,6 +161,7 @@ proyektOption.action("cancel", async (ctx: any) => {
 });
 const option = new Composer();
 option.on("text", async (ctx: any) => {
+  console.log(ctx);
   const message = ctx.update.message.text;
   const id = ctx.update.message.from.id;
   const textMain = `💁‍♀️ Loyiha: <i>${message}</i>
@@ -173,7 +176,7 @@ option.on("text", async (ctx: any) => {
     name: message,
     userId: user.id,
   });
-  ctx.telegram.sendMessage(id, textMain, {
+  await ctx.telegram.sendMessage(id, textMain, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
@@ -231,7 +234,8 @@ option.action("channel", async (ctx: any) => {
       ],
     },
   });
-  return ctx.wizard.next();
+  console.log(ctx.stage);
+  return ctx.wizard.next({});
 });
 
 option.action("back", async (ctx: any) => {
@@ -263,18 +267,67 @@ option.action("back", async (ctx: any) => {
 });
 
 const Connection = new Composer();
+
 Connection.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
   console.log(ctx.update);
-  const forward = ctx.update.message.forward_from_chat as forward_from;
+  const forward = ctx.update.message.forward_from_chat;
 
-  if (!forward.username) {
-    ctx.deleteMessage(messageId);
-    ctx.telegram.sendMessage(
+  if (forward.username) {
+    await ctx.deleteMessage(messageId);
+    await ctx.telegram.sendMessage(
       id,
-      "Kanalni ulamoqchi bo'lyapsizmi ulamoqchi bo'lyapsizmi sizning kallangiz bormi?"
+      "Ommaviy Kanalni ulay olmaysiz iltimos shaxsiy kanalni ulang"
     );
+  } else {
+    await ctx.deleteMessage(messageId);
+    const user = await User.findOne({
+      where: {
+        telegramId: id,
+        activ: true,
+      },
+    });
+    const proyektOp = await proyekt.findAll({
+      where: {
+        userId: user.id,
+        activ: true,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+    const proyektId = proyektOp[0].dataValues.id;
+    const channel = await Channel.update(
+      {
+        proyektId,
+      },
+      {
+        where: {
+          name: forward.title,
+        },
+      }
+    );
+    const data = await Channel.findOne({
+      where: { name: forward.title },
+    });
+    console.log(data);
+    if (data) {
+      await ctx.telegram.sendMessage(
+        id,
+        `Siz muvaffaqiyatli ulandingiz
+      ${data.name} kanali.
+      
+      Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
+      tegishli tugmani bosing.`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "Yangi Resurs qo'shing", callback_data: "newResurs" }],
+              [{ text: "Tarif Rejasini yaratish", callback_data: "newTarif" }],
+            ],
+          },
+        }
+      );
+    }
   }
 });
 const menuSchema: any = new Scenes.WizardScene(
@@ -299,6 +352,7 @@ bot.start(async (ctx: any) => {
       telegramId: id,
     },
   });
+  console.log(user);
   if (!user) {
     user = await User.create({
       username: name,
@@ -330,13 +384,16 @@ bot.on("my_chat_member", async (ctx: any) => {
   const userId = ctx.update.my_chat_member.from.id;
   const chatId = ctx.update.my_chat_member.chat.id;
   const test = ctx.update.my_chat_member.new_chat_member.status;
-  const name = ctx.update.my_chat_member.from.username;
+  const name = ctx.update.my_chat_member.chat.title;
   const chatType = ctx.update.my_chat_member.chat.type;
   const user = await User.findOne({
     where: { telegramId: userId },
   });
   if (!user) {
-    ctx.telegram.sendMessage(chatId, `Siz ro'yxatdan o'tmadingiz!`);
+    return await ctx.telegram.sendMessage(
+      chatId,
+      `Siz ro'yxatdan o'tmadingiz!`
+    );
   }
   console.log(test);
   if (test == "left") {
@@ -356,7 +413,7 @@ bot.on("my_chat_member", async (ctx: any) => {
       name: name,
       telegramId: chatId * 1,
       type: chatType,
-      userId: userId.id,
+      userId: user.id,
     });
     console.log(chanel);
   }
