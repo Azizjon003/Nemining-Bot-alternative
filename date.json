@@ -1,0 +1,36 @@
+[
+  [
+    {
+      "text": "1 kun",
+      "callback_data": "24"
+    },
+    {
+      "text": "2 kun",
+      "callback_data": "48"
+    },
+    {
+      "text": "3 kun",
+      "callback_data": "72"
+    }
+  ],
+  [
+    {
+      "text": "1 hafta",
+      "callback_data": "168"
+    },
+    {
+      "text": "2 hafta",
+      "callback_data": "336"
+    },
+    {
+      "text": "3 hafta",
+      "callback_data": "504"
+    }
+  ],
+  [
+    {
+      "text": "Loyihani bekor qilish",
+      "callback_data": "cancel"
+    }
+  ]
+]

@@ -2,6 +2,7 @@ import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
 import cli, { xterm } from "cli-color";
 import fs from "fs";
+import { isNumber } from "util";
 const db = require("./model/index");
 const User = db.user;
 const proyekt = db.proyekt;
@@ -415,12 +416,50 @@ tarifName.on("text", async (ctx: any) => {
       },
     }
   );
+  const data = await Tarif.findOne({ where: { id: tarifId } });
+
   await ctx.telegram.sendMessage(
     id,
-    `Tarif nomi muvaffaqiyatli saqlandi ${text}\n Tarifga `,
+    `Tarif nomi muvaffaqiyatli saqlandi <b>${text}</b>\nTarif summasini kiriting (min: 1000 ${data.currency})`,
+    {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Proyektni Bekor qilish",
+              callback_data: "cancel",
+            },
+          ],
+        ],
+      },
+    }
+  );
+});
+const currency = new Composer();
+
+currency.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const messageId = ctx.update.message.message_id;
+  const text = ctx.update.message.text;
+  if (text.isNumber()) {
+    return await ctx.telegram.sendMessage(id, "Iltimos son kiriting");
+  }
+  const user = await User.findOne({ telegramId: id, activ: true });
+  const tarifOp = await Tarif.findAll({
+    where: { userId: id },
+    order: [["createdAt", "DESC"]],
+  });
+  const tarifId = tarifOp[0].dataValues.id;
+  const tarif = await Tarif.update({
+    price: text,
+  });
+  const dataArr = JSON.parse(fs.readFileSync("./date.json", "utf-8"));
+  await ctx.telegram.sendMessage(
+    "Tarif summasi muvaffaqiyatli saqlandi,Siz Kerakli vaqtni tanlang",
     {
       reply_markup: {
-        inline_keyboard: [],
+        inline_keyboard: dataArr,
       },
     }
   );
