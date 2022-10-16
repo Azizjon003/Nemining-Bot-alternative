@@ -30,7 +30,7 @@ const channel = (sequelize: any, DataTypes: any) => {
       },
       proyektId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         refrences: {
           model: "proyekt",
           key: "id",

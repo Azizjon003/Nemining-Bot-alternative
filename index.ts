@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import cli from "cli-color";
 const db = require("./model/index");
 const User = db.user;
+const proyekt = db.proyekt;
+const Tarif = db.tarif;
+const Channel = db.channel;
 
 interface forward_from {
   id: bigint;
@@ -32,20 +35,39 @@ newWizart.hears("Yordam", async (ctx: any) => {
 });
 
 newWizart.hears("Proyektlar", async (ctx: any) => {
-  console.log(ctx);
   const id = ctx.update.message.from.id;
-  await ctx.telegram.sendMessage(id, "Sizning loyihalaringiz ro'yxati: \n", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Yangi Proyekt Yaratish",
-            callback_data: `newproyekt`,
-          },
-        ],
-      ],
-    },
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  console.log(user);
+  if (!user) {
+    ctx.telegram.sendMessage(id, `Siz ro'yhatdan o'tmagansiz!`, {
+      parse_mode: "HTML",
+    });
+  }
+  let text = "";
+  const userProyekt = await proyekt.findAll({
+    where: { userId: user.id, activ: true },
   });
+  console.log(userProyekt);
+  for (let i = 0; i < userProyekt.length; i++) {
+    text = String(userProyekt[i].dataValues.name) + "\n" + text;
+  }
+  await ctx.telegram.sendMessage(
+    id,
+    `Sizning loyihalaringiz ro'yxati: <i>${text || ""}</i> \n`,
+    {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yangi Proyekt Yaratish",
+              callback_data: `newproyekt`,
+            },
+          ],
+        ],
+      },
+    }
+  );
   return ctx.wizard.next();
 });
 
@@ -53,8 +75,11 @@ const newProyekt = new Composer();
 newProyekt.action("newproyekt", async (ctx: any) => {
   const updateId = ctx.update.callback_query.id;
   const messageId = ctx.update.callback_query.message?.message_id;
-  const text = `💁🏻‍♂️ Siz qanday loyiha yaratmoqchisiz?\n- Pulli obuna: shaxsiy kanal yoki guruhingizga pullik obunani tashkil qilish\n- Donat: Donat qabul qilishni tashkil etish`;
+
   const id = ctx.update.callback_query.from.id;
+
+  const text = `💁🏻‍♂️ Siz qanday loyiha yaratmoqchisiz?\n- Pulli obuna: shaxsiy kanal yoki guruhingizga pullik obunani tashkil qilish\n- Donat: Donat qabul qilishni tashkil etish`;
+
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     reply_markup: {
       inline_keyboard: [
@@ -143,6 +168,11 @@ option.on("text", async (ctx: any) => {
   Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
 
   Nimani bog'laysiz?`;
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  const project = await proyekt.create({
+    name: message,
+    userId: user.id,
+  });
   ctx.telegram.sendMessage(id, textMain, {
     parse_mode: "HTML",
     reply_markup: {
@@ -203,6 +233,7 @@ option.action("channel", async (ctx: any) => {
   });
   return ctx.wizard.next();
 });
+
 option.action("back", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
@@ -263,19 +294,20 @@ bot.start(async (ctx: any) => {
     ctx.update.message.from.username || ctx.update.message.from.first_name;
   const id = ctx.update.message.from.id;
 
-  const user = await User.findOne({
+  let user = await User.findOne({
     where: {
       telegramId: id,
     },
   });
-  if (!User) {
-    const data = await User.create({
+  if (!user) {
+    user = await User.create({
       username: name,
       telegramId: id,
     });
   } else {
-    await User.update({ username: name }, { where: { telegramId: id } });
+    // await User.update({ username: name }, { where: { telegramId: id } });
   }
+  console.log(user);
 
   ctx.telegram.sendMessage(
     id,
@@ -293,5 +325,41 @@ bot.start(async (ctx: any) => {
   ctx.scene.enter("sceneWizard");
 });
 
+bot.on("my_chat_member", async (ctx: any) => {
+  console.log(ctx.update.my_chat_member);
+  const userId = ctx.update.my_chat_member.from.id;
+  const chatId = ctx.update.my_chat_member.chat.id;
+  const test = ctx.update.my_chat_member.new_chat_member.status;
+  const name = ctx.update.my_chat_member.from.username;
+  const chatType = ctx.update.my_chat_member.chat.type;
+  const user = await User.findOne({
+    where: { telegramId: userId },
+  });
+  if (!user) {
+    ctx.telegram.sendMessage(chatId, `Siz ro'yxatdan o'tmadingiz!`);
+  }
+  console.log(test);
+  if (test == "left") {
+    Channel.update(
+      {
+        activ: false,
+      },
+      {
+        where: {
+          telegramId: chatId,
+        },
+      }
+    );
+  }
+  if (test == "administrator") {
+    const chanel = await Channel.create({
+      name: name,
+      telegramId: chatId * 1,
+      type: chatType,
+      userId: userId.id,
+    });
+    console.log(chanel);
+  }
+});
 console.log("Bot is running");
 bot.launch();

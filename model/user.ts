@@ -18,6 +18,7 @@ const User = (sequelize: any, DataTypes: any) => {
       role: {
         type: DataTypes.ENUM,
         values: ["admin", "user"],
+        defaultValue: "user",
       },
       activ: {
         type: DataTypes.BOOLEAN,

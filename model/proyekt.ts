@@ -17,15 +17,15 @@ const proyekt = (Sequelize: any, DataTypes: any) => {
       },
       username: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       token: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       telegramId: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
       },
       userId: {
         type: DataTypes.INTEGER,
@@ -34,6 +34,10 @@ const proyekt = (Sequelize: any, DataTypes: any) => {
           model: "user",
           key: "id",
         },
+      },
+      activ: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
       },
     },
     {
