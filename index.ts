@@ -483,6 +483,7 @@ currency.on("text", async (ctx: any) => {
   const dataArr = JSON.parse(fs.readFileSync("./date.json", "utf-8"));
   console.log(dataArr);
   await ctx.telegram.sendMessage(
+    id,
     "Tarif summasi muvaffaqiyatli saqlandi,Siz Kerakli vaqtni tanlang",
     {
       reply_markup: {
@@ -490,6 +491,7 @@ currency.on("text", async (ctx: any) => {
       },
     }
   );
+  return ctx.wizard.next();
 });
 
 const description = new Composer();
@@ -520,6 +522,12 @@ description.on("callback_query", async (ctx: any) => {
       },
     }
   );
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    `bweweurbwerbewrhjwebruiewghbruweibrweiugrbewiugbrewiurgbewui`
+  );
 });
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
@@ -530,7 +538,8 @@ const menuSchema: any = new Scenes.WizardScene(
   Connection,
   tarif,
   tarifName,
-  currency
+  currency,
+  description
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);
