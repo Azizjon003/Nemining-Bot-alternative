@@ -296,6 +296,13 @@ Connection.on("text", async (ctx: any) => {
       order: [["createdAt", "DESC"]],
     });
     const proyektId = proyektOp[0].dataValues.id;
+    const channelData = await Channel.findOne({ where: { proyektId } });
+    if (!channelData) {
+      return ctx.telegram.sendMessage(
+        id,
+        "Bu kanal boshqa loyihaga ulangan,Boshqa kanalni ulashingiz mumkun"
+      );
+    }
     const channel = await Channel.update(
       {
         proyektId,
