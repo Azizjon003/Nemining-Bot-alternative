@@ -543,6 +543,18 @@ bot.on("my_chat_member", async (ctx: any) => {
       }
     );
   }
+  if (test == "kicked") {
+    Channel.update(
+      {
+        activ: false,
+      },
+      {
+        where: {
+          telegramId: chatId,
+        },
+      }
+    );
+  }
   if (test == "administrator") {
     const chanel = await Channel.create({
       name: name,
