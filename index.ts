@@ -522,13 +522,36 @@ description.on("callback_query", async (ctx: any) => {
       },
     }
   );
+  console.log(tarif);
+  if (!tarif) {
+    return await ctx.telegram.sendMessage(
+      id,
+      "Tarif rejasini yaratishda xatolik yuz berdi"
+    );
+  }
+  const channel = await Channel.findOne({
+    where: { userId: user.id },
+    order: ["createdAt", "DESC"],
+  });
+  const name = channel.name;
   await ctx.telegram.editMessageText(
     id,
     messageId,
     updateId,
-    `bweweurbwerbewrhjwebruiewghbruweibrweiugrbewiugbrewiurgbewui`
+    `Tarif rejasi tasdiqlandi va <b>${name}</b> kanaliga ulandi`,
+    {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Tasdiqlash", callback_data: "confirm" }],
+          [{ text: "Bekor qilish", callback_data: "cancel" }],
+        ],
+      },
+    }
   );
 });
+
+const botConfirm = new Composer();
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
   newWizart,
@@ -539,7 +562,8 @@ const menuSchema: any = new Scenes.WizardScene(
   tarif,
   tarifName,
   currency,
-  description
+  description,
+  botConfirm
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);
