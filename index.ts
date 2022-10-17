@@ -113,7 +113,6 @@ const proyektOption = new Composer();
 proyektOption.action("money", async (ctx: any) => {
   const text = `ℹ️ <i>Agar biror bosqichda xatoga yo'l qo'ysangiz - loyiha yaratishning barcha bosqichlaridan o'ting.
   Keyin har qanday sozlamani o'zgartirishingiz mumkin.</i>
-
   <b>Yangi loyiha nomini kiriting:
   Misol => Loyiha:Nomi
   </b>`;
@@ -170,7 +169,7 @@ proyektOption.action("cancel", async (ctx: any) => {
       },
     }
   );
-  return ctx.wizard.back();
+  return ctx.wizard.back().back();
 
   // ctx.telegram.editMessageReplyMarkup(id,messageId,,);
   // await ctx.deleteMessage();
@@ -253,6 +252,26 @@ option.action("channel", async (ctx: any) => {
   return ctx.wizard.next({});
 });
 
+option.action("group", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const text = `ℹ️ <i>1.Ulangan guruh administratorlariga meni @Nemilin_bot qo'shing\n2. Ruxsat talab qilinadi A'zolar qo'shing\n3.Menga guruhdan istalgan xabarni yuboring (to'g'ridan-to'g'ri ushbu chatga).
+    <b>Kutish Holatida...</b></i>`;
+  ctx.telegram.editMessageText(id, messageId, updateId, text, {
+    parse_mode: "HTML",
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "Orqaga", callback_data: "back" }],
+        [{ text: "Bekor qilish", callback_data: "cancel" }],
+      ],
+    },
+  });
+  // console.log(ctx.stage);
+  return ctx.wizard.next({});
+});
 option.action("back", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
@@ -283,12 +302,64 @@ option.action("back", async (ctx: any) => {
 
 const Connection = new Composer();
 
+Connection.hears("Group", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const messageId = ctx.update.message.message_id;
+  const title = ctx.update.message.chat.title;
+  const groupId = ctx.update.message.chat.id;
+  const username = ctx.update.message.chat?.username;
+  if (!username) {
+    return await ctx.reply("Ommaviy guruhi ulab bo'lmaydi");
+  }
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  const ProyektOp = await proyekt.findOne({
+    where: { userId: user?.id },
+    order: [["createdAt", "DESC"]],
+  });
+  const proyektId = ProyektOp[0]?.dataValues.id;
+  const group = await Channel.findOne({
+    where: { name: title, userId: user.id, activ: true },
+  });
+  if (!group) {
+    return await ctx.reply("Ulangan guruh topilmadi");
+  }
+  const groupOp = await Channel.update(
+    {
+      proyektId: proyektId,
+    },
+    {
+      where: { name: title, userId: user.id, activ: true },
+    }
+  );
+
+  const data = await Channel.findOne({
+    where: {
+      name: title,
+    },
+  });
+  if (data) {
+    await ctx.telegram.sendMessage(
+      id,
+      `Siz muvaffaqiyatli ulandingiz
+    ${data.name} Guruhi.
+    
+    Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
+    tegishli tugmani bosing.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "Yangi Resurs qo'shing", callback_data: "newResurs" }],
+            [{ text: "Tarif Rejasini yaratish", callback_data: "newTarif" }],
+          ],
+        },
+      }
+    );
+  }
+});
 Connection.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
-  // console.log(ctx.update);
   const forward = ctx.update.message.forward_from_chat;
-
   if (forward.username) {
     await ctx.deleteMessage(messageId);
     return await ctx.telegram.sendMessage(
@@ -297,7 +368,7 @@ Connection.on("text", async (ctx: any) => {
     );
   } else {
     await ctx.deleteMessage(messageId);
-    // console.log(ctx.update.message);
+
     const user = await User.findOne({
       where: {
         telegramId: id,
@@ -312,7 +383,6 @@ Connection.on("text", async (ctx: any) => {
       order: [["createdAt", "DESC"]],
     });
     const proyektId = proyektOp[0].dataValues.id;
-    // console.log(proyektId);
     const channelData = await Channel.findOne({
       where: { name: forward.title, userId: user.id, activ: true },
     });
@@ -651,6 +721,9 @@ bot.start(async (ctx: any) => {
   ctx.scene.enter("sceneWizard");
 });
 
+bot.on("text", async (ctx: any) => {
+  console.log(ctx.update);
+});
 bot.on("my_chat_member", async (ctx: any) => {
   console.log(ctx.update.my_chat_member);
   const userId = ctx.update.my_chat_member.from.id;
