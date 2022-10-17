@@ -72,6 +72,20 @@ newWizart.hears("Proyektlar", async (ctx: any) => {
   );
   return ctx.wizard.next();
 });
+newWizart.hears("To'lovlar", async (ctx: any) => {
+  const text = `<i>To'lovlar bo'limi hozircha ishga tushirilmagan! Yaqin kunlarda ishga tushiramiz</i>`;
+  const id = ctx.update.message.from.id;
+  ctx.telegram.sendMessage(id, text, {
+    parse_mode: "HTML",
+  });
+});
+newWizart.hears("Sozlamalar", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const text = `<i>Sozlamalar bo'limi hozircha ishga tushirilmagan! Yaqin kunlarda ishga tushiramiz</i>`;
+  ctx.telegram.sendMessage(id, text, {
+    parse_mode: "HTML",
+  });
+});
 
 const newProyekt = new Composer();
 newProyekt.action("newproyekt", async (ctx: any) => {
