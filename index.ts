@@ -2,7 +2,7 @@ import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
 import cli, { xterm } from "cli-color";
 import fs from "fs";
-import { isNumber } from "util";
+const botFather = require("./utility/botfather");
 const db = require("./model/index");
 const User = db.user;
 const proyekt = db.proyekt;
@@ -531,7 +531,7 @@ description.on("callback_query", async (ctx: any) => {
   }
   const channel = await Channel.findOne({
     where: { userId: user.id },
-    order: ["createdAt", "DESC"],
+    order: [["createdAt", "DESC"]],
   });
   const name = channel.name;
   await ctx.telegram.editMessageText(
@@ -549,6 +549,7 @@ description.on("callback_query", async (ctx: any) => {
       },
     }
   );
+  return ctx.wizard.next();
 });
 
 const botConfirm = new Composer();
@@ -578,6 +579,9 @@ botConfirm.on("text", async (ctx: any) => {
   const message = ctx.update.message.text;
   console.log(ctx.update);
   console.log(message);
+  const botullo = new botFather(message);
+  botullo.start();
+  return ctx.wizard.next();
 });
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
