@@ -348,8 +348,8 @@ Connection.hears("Group", async (ctx: any) => {
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: "Yangi Resurs qo'shing", callback_data: "newResurs" }],
             [{ text: "Tarif Rejasini yaratish", callback_data: "newTarif" }],
+            [{ text: "Bekor Qilish", callback_data: "cancel" }],
           ],
         },
       }
@@ -416,8 +416,8 @@ Connection.on("text", async (ctx: any) => {
         {
           reply_markup: {
             inline_keyboard: [
-              [{ text: "Yangi Resurs qo'shing", callback_data: "newResurs" }],
               [{ text: "Tarif Rejasini yaratish", callback_data: "newTarif" }],
+              [{ text: "Bekor Qilish", callback_data: "cancel" }],
             ],
           },
         }
@@ -444,6 +444,30 @@ Connection.action("newTarif", async (ctx: any) => {
     }
   );
   return ctx.wizard.next();
+});
+Connection.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = ctx.update.callback_query.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Sizning loyihalaringiz ro'yxati: \n",
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yangi Proyekt Yaratish",
+              callback_data: `newproyekt`,
+            },
+          ],
+        ],
+      },
+    }
+  );
+  return ctx.wizard.back().back().back();
 });
 
 const tarif = new Composer();
@@ -529,8 +553,32 @@ tarifName.on("text", async (ctx: any) => {
   );
   return ctx.wizard.next();
 });
-const currency = new Composer();
 
+const currency = new Composer();
+currency.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = ctx.update.callback_query.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Sizning loyihalaringiz ro'yxati: \n",
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yangi Proyekt Yaratish",
+              callback_data: `newproyekt`,
+            },
+          ],
+        ],
+      },
+    }
+  );
+  return ctx.wizard.back().back().back().back().back();
+});
 currency.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
@@ -638,6 +686,30 @@ description.on("callback_query", async (ctx: any) => {
 
 const botConfirm = new Composer();
 
+Connection.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = ctx.update.callback_query.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Sizning loyihalaringiz ro'yxati: \n",
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yangi Proyekt Yaratish",
+              callback_data: `newproyekt`,
+            },
+          ],
+        ],
+      },
+    }
+  );
+  return ctx.wizard.back().back().back().back().back().back();
+});
 botConfirm.on("callback_query", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
@@ -656,7 +728,7 @@ botConfirm.on("callback_query", async (ctx: any) => {
       },
     });
   }
-  // return ctx.scene.next();
+  return ctx.wizard.next();
 });
 botConfirm.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
