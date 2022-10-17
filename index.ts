@@ -552,6 +552,33 @@ description.on("callback_query", async (ctx: any) => {
 });
 
 const botConfirm = new Composer();
+
+botConfirm.on("callback_query", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const data = ctx.update.callback_query.data;
+  if (data == "confirm") {
+    const text = `Endi siz obunachilaringiz muloqot qiladigan shaxsiy botingizni ulashingiz kerak.\nBuning uchun:\n1. Botlarning otasini oching - @BotFather\n2. Yangi bot yarating (buyruq/newbot)\n3. Ota sizga shaxsiy botingizning API tokenini yuboradi (format 123456789:ASDFABC-DEF1234gh) - bu tokenni nusxalab, menga yuboring.\nMuhim! Boshqa xizmatga (yoki boshqa botlarga) ulangan botdan foydalanmang!\nMen tokenni kutyapman...`;
+    await ctx.telegram.editMessageText(id, messageId, updateId, text, {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Loyihani Bekor Qilish", callback_data: "cancel" }],
+        ],
+      },
+    });
+  }
+  // return ctx.scene.next();
+});
+botConfirm.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const message = ctx.update.message.text;
+  console.log(ctx.update);
+  console.log(message);
+});
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
   newWizart,
