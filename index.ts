@@ -738,16 +738,43 @@ botConfirm.on("callback_query", async (ctx: any) => {
       },
     });
   }
-  return ctx.wizard.next();
+  // return ctx.wizard.next();
 });
 botConfirm.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
-  console.log(ctx.update);
-  console.log(message);
-  const botullo = new botFather(message);
-  botullo.start();
-  return ctx.wizard.next();
+  try {
+    console.log(message);
+    const botullo = new botFather(message);
+    botullo.start();
+
+    const user = await User.findOne({ telegramId: id, activ: true });
+    const project = await proyekt.findAll({
+      where: { userId: user.id },
+      order: [["createdAt", "DESC"]],
+    });
+    const projectId = project[0].dataValues.id;
+    const projectUpdate = await proyekt.update(
+      {
+        token: message,
+      },
+      {
+        where: {
+          id: projectId,
+        },
+      }
+    );
+
+    await ctx.telegram.sendMessage(
+      id,
+      "Bot tokeni muvaffaqiyatli saqlandi",
+      {}
+    );
+  } catch (e) {
+    return await ctx.telegram.sendMessage(id, "Bot tokeni noto'g'ri kiritildi");
+  }
+
+  return ctx.wizard.leave();
 });
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
