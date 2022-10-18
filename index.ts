@@ -774,7 +774,7 @@ botConfirm.on("text", async (ctx: any) => {
     return await ctx.telegram.sendMessage(id, "Bot tokeni noto'g'ri kiritildi");
   }
 
-  return ctx.wizard.leave();
+  return ctx.scene.enter("sceneWizard");
 });
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
@@ -794,6 +794,7 @@ const stage: any = new Scenes.Stage([menuSchema]);
 bot.use(session());
 bot.use(stage.middleware());
 bot.start(async (ctx: any) => {
+  console.log(ctx.telegram);
   const name =
     ctx.update.message.from.username || ctx.update.message.from.first_name;
   const id = ctx.update.message.from.id;
