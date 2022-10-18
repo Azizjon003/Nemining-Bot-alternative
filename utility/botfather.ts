@@ -2,7 +2,7 @@ import { Telegraf } from "telegraf";
 const db = require("../model/index");
 const Project = db.proyekt;
 const Tarif = db.tarif;
-const Kanal = db.kanal;
+const Kanal = db.channel;
 class botFather {
   token: string;
   constructor(token: string) {
@@ -20,12 +20,12 @@ class botFather {
       });
       const tarif = await Tarif.findOne({
         where: {
-          proyectId: project.id,
+          proyektId: project.id,
         },
       });
       const kanal = await Kanal.findOne({
         where: {
-          proyectId: project.id,
+          proyektId: project.id,
         },
       });
       const text = `Assalomu alaykum Men quydagi ${tarif.name} tarifni ishlataman. ${kanal.type}im ${kanal.name} ${kanal.type}i.${kanal.name}imizga ulanish uchun qiyidagi ishlarni bajaring.`;
@@ -35,8 +35,8 @@ class botFather {
       ctx.telegram.sendMessage(id, text, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: `Tarif: ${tarif.name}`, calback_data: `${tarif.name}` }],
-            [{}],
+            [{ text: `Tarif: ${tarif.name}`, callback_data: `${tarif.name}` }],
+            [{ text: "Tarifni bekor qilish", callback_data: "cancel" }],
           ],
         },
       });

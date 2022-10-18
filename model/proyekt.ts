@@ -10,10 +10,6 @@ const proyekt = (Sequelize: any, DataTypes: any) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          min: 4,
-          max: 10,
-        },
       },
       username: {
         type: DataTypes.STRING,
