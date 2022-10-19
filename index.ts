@@ -87,6 +87,12 @@ newWizart.hears("Sozlamalar", async (ctx: any) => {
   });
 });
 
+newWizart.on("text", async (ctx) => {
+  const id = ctx.update.message.from.id;
+  const text = `Bunaqa buyruq mavjud emas!`;
+  ctx.telegram.sendMessage(id, text, {});
+});
+
 const newProyekt = new Composer();
 newProyekt.action("newproyekt", async (ctx: any) => {
   const updateId = ctx.update.callback_query.id;
@@ -96,6 +102,7 @@ newProyekt.action("newproyekt", async (ctx: any) => {
 
   const text = `💁🏻‍♂️ Siz qanday loyiha yaratmoqchisiz?\n- Pulli obuna: shaxsiy kanal yoki guruhingizga pullik obunani tashkil qilish\n- Donat: Donat qabul qilishni tashkil etish`;
 
+  ctx.telegram.callB;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     reply_markup: {
       inline_keyboard: [

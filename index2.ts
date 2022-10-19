@@ -98,6 +98,7 @@ number.on("contact", async (msg) => {
   // console.log(state);
   return msg.wizard.next();
 });
+
 const location = new Composer();
 location.on("location", async (msg) => {
   const about = await msg.update.message.from;
