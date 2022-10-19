@@ -1,14 +1,49 @@
 import { Telegraf } from "telegraf";
+interface Kanal {
+  id: number;
+  name: string;
+  telegramId: number;
+  type: string;
+  userId: number;
+  proyektId: number;
+  activ: boolean;
+}
+interface Tarif {
+  id: number;
+  name: string;
+  userId: number;
+  proyektId: number;
+  activ: boolean;
+}
 const db = require("../model/index");
 const Project = db.proyekt;
 const Tarif = db.tarif;
 const Kanal = db.channel;
 class botFather {
   token: string;
-  constructor(token: string) {
+  fatherBot: any;
+  constructor(token: string, fatherBot: any) {
     this.token = token;
+    this.fatherBot = fatherBot;
   }
-  start() {
+  async start() {
+    let kanal = {
+      id: 1,
+      name: "test",
+      telegramId: 1,
+      type: "channel",
+      userId: 1,
+      proyektId: 1,
+      activ: true,
+    } as Kanal;
+    let tarif = {
+      id: 1,
+      name: "test",
+      userId: 1,
+      proyektId: 1,
+      activ: true,
+    } as Tarif;
+
     const bot = new Telegraf(this.token);
     bot.start(async (ctx: any) => {
       console.log(ctx);
@@ -18,12 +53,12 @@ class botFather {
           token: token,
         },
       });
-      const tarif = await Tarif.findOne({
+      tarif = await Tarif.findOne({
         where: {
           proyektId: project.id,
         },
       });
-      const kanal = await Kanal.findOne({
+      kanal = await Kanal.findOne({
         where: {
           proyektId: project.id,
         },
@@ -41,6 +76,35 @@ class botFather {
         },
       });
     });
+    console.log(tarif);
+    bot.action(`${tarif.name}`, async (ctx) => {
+      console.log("e kalla");
+      console.log(ctx);
+    });
+    bot.action("cancel", async (ctx) => {
+      const id = ctx.update.callback_query.from.id;
+      const name =
+        ctx.update.callback_query.from.username ||
+        ctx.update.callback_query.from.first_name;
+      const text = `Sizning <b> <i>${kanal.name}</i></b> ${kanal.type}ingizga ulanish bekor qilindi`;
+      ctx.telegram.sendMessage(id, text, {
+        parse_mode: "HTML",
+      });
+    });
+    bot.on("callback_query", async (ctx) => {
+      const id = ctx.update.callback_query.from.id;
+      const data = ctx.update.callback_query.data;
+      if (data == tarif.name) {
+        const link = await this.fatherBot.telegram.createChatInviteLink(
+          kanal.telegramId,
+          kanal.name,
+          10000,
+          1
+        );
+        console.log(link);
+      }
+    });
+
     bot.launch();
   }
 }

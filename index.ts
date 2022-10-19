@@ -24,6 +24,7 @@ const TOKEN = String(process.env.TOKEN);
 const bot = new Telegraf(TOKEN);
 
 const newWizart = new Composer();
+
 newWizart.hears("Yordam", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   ctx.telegram.sendMessage(
@@ -87,8 +88,9 @@ newWizart.hears("Sozlamalar", async (ctx: any) => {
   });
 });
 
-newWizart.on("text", async (ctx) => {
+newWizart.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
   const id = ctx.update.message.from.id;
+  const txt = ctx.update.message.text;
   const text = `Bunaqa buyruq mavjud emas!`;
   ctx.telegram.sendMessage(id, text, {});
 });
@@ -115,6 +117,16 @@ newProyekt.action("newproyekt", async (ctx: any) => {
     },
   });
   return ctx.wizard.next();
+});
+
+newProyekt.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const txt = ctx.update.message.text;
+  if (txt == "/start") {
+    return ctx.scene.leave();
+  }
+  const text = `Bunaqa buyruq mavjud emas!.Loyiha yaratish uchun /start ni bosing`;
+  ctx.telegram.sendMessage(id, text, {});
 });
 const proyektOption = new Composer();
 proyektOption.action("money", async (ctx: any) => {
@@ -180,6 +192,16 @@ proyektOption.action("cancel", async (ctx: any) => {
 
   // ctx.telegram.editMessageReplyMarkup(id,messageId,,);
   // await ctx.deleteMessage();
+});
+
+proyektOption.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const txt = ctx.update.message.text;
+  if (txt == "/start") {
+    return ctx.scene.leave();
+  }
+  const text = `Bunaqa buyruq mavjud emas!.Loyiha yaratish uchun /start ni bosing`;
+  ctx.telegram.sendMessage(id, text, {});
 });
 const option = new Composer();
 option.on("text", async (ctx: any) => {
@@ -837,64 +859,6 @@ bot.start(async (ctx: any) => {
   );
   return ctx.scene.enter("sceneWizard");
 });
-
-// bot.hears("group", async (ctx: any) => {
-//   console.log(cli.red("Dsgvdkjasg"));
-//   console.log(ctx.update);
-//   const id = ctx.update.message.from.id;
-//   const messageId = ctx.update.message.message_id;
-//   const title = ctx.update.message.chat.title;
-//   const groupId = ctx.update.message.chat.id;
-//   const username = ctx.update.message.chat?.username;
-//   if (username) {
-//     return await ctx.reply("Ommaviy guruhi ulab bo'lmaydi");
-//   }
-//   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-//   const ProyektOp = await proyekt.findOne({
-//     where: { userId: user?.id },
-//     order: [["createdAt", "DESC"]],
-//   });
-//   const proyektId = ProyektOp[0]?.dataValues.id;
-//   const group = await Channel.findOne({
-//     where: { name: title, userId: user.id, activ: true },
-//   });
-//   if (!group) {
-//     return await ctx.reply("Ulangan guruh topilmadi");
-//   }
-//   const groupOp = await Channel.update(
-//     {
-//       proyektId: proyektId,
-//     },
-//     {
-//       where: { name: title, userId: user.id, activ: true },
-//     }
-//   );
-
-//   const data = await Channel.findOne({
-//     where: {
-//       name: title,
-//     },
-//   });
-//   if (data) {
-//     await ctx.telegram.sendMessage(
-//       id,
-//       `Siz muvaffaqiyatli ulandingiz
-//     ${data.name} Guruhi.
-
-//     Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
-//     tegishli tugmani bosing.`,
-//       {
-//         reply_markup: {
-//           inline_keyboard: [
-//             [{ text: "Tarif Rejasini yaratish", callback_data: "newTarif" }],
-//             [{ text: "Bekor Qilish", callback_data: "cancel" }],
-//           ],
-//         },
-//       }
-//     );
-//   }
-//   ctx.scene.enter("sceneWizard");
-// });
 
 bot.on("my_chat_member", async (ctx: any) => {
   console.log(ctx.update.my_chat_member);
