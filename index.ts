@@ -773,8 +773,8 @@ botConfirm.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
   try {
-    console.log(message);
-    const botullo = new botFather(message);
+    // console.log(message);
+    const botullo = new botFather(message, bot);
     botullo.start();
 
     const user = await User.findOne({ telegramId: id, activ: true });
@@ -823,7 +823,7 @@ const stage: any = new Scenes.Stage([menuSchema]);
 bot.use(session());
 bot.use(stage.middleware());
 bot.start(async (ctx: any) => {
-  console.log(ctx.telegram);
+  // console.log(ctx.telegram);
   const name =
     ctx.update.message.from.username || ctx.update.message.from.first_name;
   const id = ctx.update.message.from.id;
@@ -833,7 +833,7 @@ bot.start(async (ctx: any) => {
       telegramId: id,
     },
   });
-  console.log(user);
+  // console.log(user);
   if (!user) {
     user = await User.create({
       username: name,
@@ -842,7 +842,7 @@ bot.start(async (ctx: any) => {
   } else {
     // await User.update({ username: name }, { where: { telegramId: id } });
   }
-  console.log(user);
+  // console.log(user);
 
   ctx.telegram.sendMessage(
     id,
@@ -861,7 +861,7 @@ bot.start(async (ctx: any) => {
 });
 
 bot.on("my_chat_member", async (ctx: any) => {
-  console.log(ctx.update.my_chat_member);
+  // console.log(ctx.update.my_chat_member);
   const userId = ctx.update.my_chat_member.from.id;
   const chatId = ctx.update.my_chat_member.chat.id;
   const test = ctx.update.my_chat_member.new_chat_member.status;
@@ -876,7 +876,7 @@ bot.on("my_chat_member", async (ctx: any) => {
       `Siz ro'yxatdan o'tmadingiz!`
     );
   }
-  console.log(test);
+  // console.log(test);
   if (test == "left") {
     Channel.update(
       {

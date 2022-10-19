@@ -101,7 +101,14 @@ class botFather {
           10000,
           1
         );
+        const linl = await this.fatherBot.telegram.exportChatInviteLink(
+          kanal.telegramId,
+          kanal.name,
+          10000,
+          1
+        );
         console.log(link);
+        console.log(linl);
       }
     });
 
