@@ -56,7 +56,9 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
     }
   );
 
-  const dataArr = JSON.parse(fs.readFileSync("../date.json", "utf-8"));
+  const dataArr = JSON.parse(
+    fs.readFileSync(__dirname + "/date.json", "utf-8")
+  );
   console.log(dataArr);
   await ctx.telegram.sendMessage(
     id,

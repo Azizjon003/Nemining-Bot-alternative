@@ -91,11 +91,11 @@ option.action("back", async (ctx: any) => {
 const Connection = new Composer();
 
 Connection.on("text", async (ctx: any) => {
-  Connections.textFunc(ctx, User, proyekt, Channel);
+  Connections.TextFunc(ctx, User, proyekt, Channel);
 });
 
 Connection.action("newTarif", async (ctx: any) => {
-  await Connections.NewTarif(ctx);
+  await Connections.newTarif(ctx);
 });
 Connection.action("cancel", async (ctx: any) => {
   await Connections.Cancel(ctx);
@@ -108,11 +108,11 @@ tarif.on("callback_query", async (ctx: any) => {
 
 const tarifName = new Composer();
 tarifName.on("text", async (ctx: any) => {
-  await tarifNames.textFunc(ctx, User, proyekt, Channel);
+  await tarifNames.textFunc(ctx, User, Tarif);
 });
 
 const currency = new Composer();
-const currencys = require("./controller/currency");
+const currencys = require("./controller/currency.ts");
 currency.action("cancel", async (ctx: any) => {
   await currencys.Cancel(ctx);
 });
@@ -121,9 +121,9 @@ currency.on("text", async (ctx: any) => {
 });
 
 const description = new Composer();
-const descript = require("./controller/description");
+const descript = require("./controller/description.ts");
 description.on("callback_query", async (ctx: any) => {
-  await descript.calBack(ctx, User, Tarif, Channel);
+  await descript.callBack(ctx, User, Tarif, Channel);
 });
 
 const botConfirm = new Composer();
@@ -135,7 +135,7 @@ Connection.action("cancel", async (ctx: any) => {
   await Connections.Cancel(ctx);
 });
 botConfirm.on("callback_query", async (ctx: any) => {
-  await botConfirms.calBack(ctx);
+  await botConfirms.callBack(ctx);
 });
 
 botConfirm.on("text", async (ctx: any) => {

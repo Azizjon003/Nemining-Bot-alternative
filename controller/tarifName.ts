@@ -87,6 +87,8 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
     }
   );
   const data = await Tarif.findOne({ where: { id: tarifId } });
+  console.log("M kalla tarif");
+  console.log(data);
 
   await ctx.telegram.sendMessage(
     id,

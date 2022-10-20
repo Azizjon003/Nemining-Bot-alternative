@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
@@ -134,7 +135,9 @@ const newTarif = async (ctx: any) => {
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
   );
-  const dataArr = JSON.parse(fs.readFileSync("../currency.json", "utf-8"));
+  const dataArr = JSON.parse(
+    fs.readFileSync(__dirname + "/currency.json", "utf-8")
+  );
   await ctx.telegram.editMessageText(
     id,
     messageId,
