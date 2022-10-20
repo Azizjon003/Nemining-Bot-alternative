@@ -112,203 +112,30 @@ tarifName.on("text", async (ctx: any) => {
 });
 
 const currency = new Composer();
+const currencys = require("./controller/currency");
 currency.action("cancel", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = ctx.update.callback_query.id;
-  const messageId = ctx.update.callback_query.message?.message_id;
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Yangi Proyekt Yaratish",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.back().back().back().back().back();
+  await currencys.Cancel(ctx);
 });
 currency.on("text", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const messageId = ctx.update.message.message_id;
-  const text = ctx.update.message.text;
-  if (!Number(text)) {
-    return await ctx.telegram.sendMessage(id, "Iltimos son kiriting");
-  }
-  console.log(cli.red(text));
-  const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  console.log(user.id);
-  const tarifOp = await Tarif.findAll({
-    where: { userId: user.id },
-    order: [["createdAt", "DESC"]],
-  });
-  const tarifId = tarifOp[0].dataValues.id;
-  console.log(tarifId);
-  if (!tarifId) {
-    return await ctx.telegram.sendMessage(
-      id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
-    );
-  }
-  console.log(tarifId);
-  const tarif = await Tarif.update(
-    {
-      price: text,
-    },
-    {
-      where: {
-        id: tarifId,
-      },
-    }
-  );
-
-  const dataArr = JSON.parse(fs.readFileSync("./date.json", "utf-8"));
-  console.log(dataArr);
-  await ctx.telegram.sendMessage(
-    id,
-    "Tarif summasi muvaffaqiyatli saqlandi,Siz Kerakli vaqtni tanlang",
-    {
-      reply_markup: {
-        inline_keyboard: dataArr,
-      },
-    }
-  );
-  return ctx.wizard.next();
+  await currencys.textFunc(ctx, User, proyekt, Tarif);
 });
 
 const description = new Composer();
-
+const descript = require("./controller/description");
 description.on("callback_query", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const data = ctx.update.callback_query.data;
-  const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const tarifOp = await Tarif.findAll({ where: { userId: user.id } });
-  const tarifId = tarifOp[0].dataValues.id;
-  if (!tarifId) {
-    return await ctx.telegram.sendMessage(
-      id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
-    );
-  }
-  const tarif = await Tarif.update(
-    {
-      time: data,
-    },
-    {
-      where: {
-        id: tarifId,
-      },
-    }
-  );
-  console.log(tarif);
-  if (!tarif) {
-    return await ctx.telegram.sendMessage(
-      id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
-    );
-  }
-  const channel = await Channel.findOne({
-    where: { userId: user.id },
-    order: [["createdAt", "DESC"]],
-  });
-  console.log(channel);
-  const name = channel?.name;
-
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    `Tarif rejasi tasdiqlandi va <b>${name}</b> kanaliga ulandi`,
-    {
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "Yana Tarif reja qo'shish", callback_data: "newtarif" }],
-          [{ text: "Tasdiqlash", callback_data: "confirm" }],
-          [{ text: "Bekor qilish", callback_data: "cancel" }],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.next();
+  await descript.calBack(ctx, User, Tarif, Channel);
 });
 
 const botConfirm = new Composer();
+const botConfirms = require("./controller/botConfirm");
 Connection.action("newtarif", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const dataArr = JSON.parse(fs.readFileSync("./currency.json", "utf-8"));
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Valyutani tanlang",
-    {
-      reply_markup: {
-        inline_keyboard: dataArr,
-      },
-    }
-  );
-  return ctx.wizard.back().back().back().back();
+  await Connections.NewTarif(ctx);
 });
 Connection.action("cancel", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = ctx.update.callback_query.id;
-  const messageId = ctx.update.callback_query.message?.message_id;
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Yangi Proyekt Yaratish",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.back().back().back().back().back().back();
+  await Connections.Cancel(ctx);
 });
 botConfirm.on("callback_query", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const data = ctx.update.callback_query.data;
-  if (data == "confirm") {
-    const text = `Endi siz obunachilaringiz muloqot qiladigan shaxsiy botingizni ulashingiz kerak.\nBuning uchun:\n1. Botlarning otasini oching - @BotFather\n2. Yangi bot yarating (buyruq/newbot)\n3. Ota sizga shaxsiy botingizning API tokenini yuboradi (format 123456789:ASDFABC-DEF1234gh) - bu tokenni nusxalab, menga yuboring.\nMuhim! Boshqa xizmatga (yoki boshqa botlarga) ulangan botdan foydalanmang!\nMen tokenni kutyapman...`;
-    await ctx.telegram.editMessageText(id, messageId, updateId, text, {
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "Loyihani Bekor Qilish", callback_data: "cancel" }],
-        ],
-      },
-    });
-  }
-  // return ctx.wizard.next();
+  await botConfirms.calBack(ctx);
 });
 
 botConfirm.on("text", async (ctx: any) => {
@@ -404,56 +231,9 @@ bot.start(async (ctx: any) => {
   );
   return ctx.scene.enter("sceneWizard");
 });
-
+const mychat = require("./controller/mychat");
 bot.on("my_chat_member", async (ctx: any) => {
-  // console.log(ctx.update.my_chat_member);
-  const userId = ctx.update.my_chat_member.from.id;
-  const chatId = ctx.update.my_chat_member.chat.id;
-  const test = ctx.update.my_chat_member.new_chat_member.status;
-  const name = ctx.update.my_chat_member.chat.title;
-  const chatType = ctx.update.my_chat_member.chat.type;
-  const user = await User.findOne({
-    where: { telegramId: userId },
-  });
-  if (!user) {
-    return await ctx.telegram.sendMessage(
-      chatId,
-      `Siz ro'yxatdan o'tmadingiz!`
-    );
-  }
-  // console.log(test);
-  if (test == "left") {
-    Channel.update(
-      {
-        activ: false,
-      },
-      {
-        where: {
-          telegramId: chatId,
-        },
-      }
-    );
-  }
-  if (test == "kicked") {
-    Channel.update(
-      {
-        activ: false,
-      },
-      {
-        where: {
-          telegramId: chatId,
-        },
-      }
-    );
-  }
-  if (test == "administrator") {
-    const chanel = await Channel.create({
-      name: name,
-      telegramId: chatId * 1,
-      type: chatType,
-      userId: user.id,
-    });
-  }
+  await mychat.mychat(ctx, User, Channel);
 });
 console.log("Bot is running");
 bot.launch();
