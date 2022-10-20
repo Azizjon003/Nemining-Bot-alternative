@@ -21,6 +21,10 @@ interface forward_from {
 const newPro = require("./controller/newProyekt");
 const newProyekts = require("./controller/newWizart");
 const proyektOptions = require("./controller/proyektOption");
+const Options = require("./controller/option");
+const Connections = require("./controller/Connection");
+const Tarifs = require("./controller/tarif");
+const tarifNames = require("./controller/tarifName");
 dotenv.config({ path: ".env" });
 require("./model");
 
@@ -60,401 +64,51 @@ proyektOption.action("donat", async (ctx: any) => {
   await proyektOptions.Donat(ctx);
 });
 proyektOption.action("cancel", async (ctx: any) => {
-  await proyektOptions.Cancel(ctx);
+  await proyektOptions.Cancels(ctx);
 });
 
-proyektOption.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
+proyektOption.hears(/\b[a-zA-Z0-9]+/gu, async (ctx: any) => {
   await newPro.xatolar(ctx);
 });
 const option = new Composer();
 option.on("text", async (ctx: any) => {
-  const message = ctx.update.message.text;
-  const id = ctx.update.message.from.id;
-  const textMain = `💁‍♀️ Loyiha: <i>${message}</i>
-
-  Endi birinchi resursingizni ulang.
-
-  Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
-
-  Nimani bog'laysiz?`;
-  const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const project = await proyekt.create({
-    name: message,
-    userId: user.id,
-  });
-  await ctx.telegram.sendMessage(id, textMain, {
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "Shaxsiy kanal", callback_data: "channel" },
-          { text: "Shaxsiy guruh", callback_data: "group" },
-        ],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
-      ],
-    },
-  });
+  await Options.TextFunction(ctx, User, proyekt);
 });
 option.action("cancel", async (ctx: any) => {
-  // console.log(ctx);
-  const id = ctx.update.callback_query.from.id;
-  const updateId = ctx.update.callback_query.id;
-  const messageId = ctx.update.callback_query.message?.message_id;
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Yangi Proyekt Yaratish",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.back().back();
-
-  // ctx.telegram.editMessageReplyMarkup(id,messageId,,);
-  // await ctx.deleteMessage();
+  await Options.Cancel(ctx);
 });
 option.action("channel", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const text = `ℹ️ <i>1.Ulangan kanal administratorlariga meni @Nemilin_bot qo'shing\n2. Ruxsat talab qilinadi A'zolar qo'shing\n3.Menga kanaldan istalgan xabarni yuboring (to'g'ridan-to'g'ri ushbu chatga).
-    <b>Kutish Holatida...</b></i>`;
-  ctx.telegram.editMessageText(id, messageId, updateId, text, {
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "Orqaga", callback_data: "back" }],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
-      ],
-    },
-  });
-  // console.log(ctx.stage);
-  return ctx.wizard.next({});
+  await Options.Channel(ctx);
 });
 
 option.action("group", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const text = `ℹ️ <i>1.Ulangan guruh administratorlariga meni @Nemilin_bot qo'shing\n2. Ruxsat talab qilinadi A'zolar qo'shing\n3.Menga guruhdan istalgan xabarni yuboring (to'g'ridan-to'g'ri ushbu chatga).
-    <b>Kutish Holatida...</b></i>`;
-  ctx.telegram.editMessageText(id, messageId, updateId, text, {
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "Orqaga", callback_data: "back" }],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
-      ],
-    },
-  });
-  // console.log(ctx.stage);
-  return ctx.wizard.next({});
+  await Options.Group(ctx);
 });
 option.action("back", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const textMain = `💁‍♀️ Loyiha: <i>${id}</i>
-
-  Endi birinchi resursingizni ulang.
-
-  Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
-
-  Nimani bog'laysiz?`;
-  ctx.telegram.editMessageText(id, messageId, updateId, textMain, {
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "Shaxsiy kanal", callback_data: "channel" },
-          { text: "Shaxsiy guruh", callback_data: "group" },
-        ],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
-      ],
-    },
-  });
-  // return ctx.wizard.back();
+  await Options.Back(ctx);
 });
 
 const Connection = new Composer();
 
 Connection.on("text", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const messageId = ctx.update.message.message_id;
-  const forward = ctx.update.message.forward_from_chat;
-  const text = ctx.update.message.text;
-  if (forward) {
-    if (forward.username) {
-      await ctx.deleteMessage(messageId);
-      return await ctx.telegram.sendMessage(
-        id,
-        "Ommaviy Kanalni ulay olmaysiz iltimos shaxsiy kanalni ulang"
-      );
-    } else {
-      await ctx.deleteMessage(messageId);
-
-      const user = await User.findOne({
-        where: {
-          telegramId: id,
-          activ: true,
-        },
-      });
-      const proyektOp = await proyekt.findAll({
-        where: {
-          userId: user.id,
-          activ: true,
-        },
-        order: [["createdAt", "DESC"]],
-      });
-      const proyektId = proyektOp[0].dataValues.id;
-      const channelData = await Channel.findOne({
-        where: { name: forward.title, userId: user.id, activ: true },
-      });
-      if (channelData.proyektId) {
-        return await ctx.telegram.sendMessage(
-          id,
-          "Bu kanal boshqa loyihaga ulangan,Boshqa kanalni ulashingiz mumkun"
-        );
-      }
-      const channel = await Channel.update(
-        {
-          proyektId,
-        },
-        {
-          where: {
-            name: forward.title,
-          },
-        }
-      );
-      const data = await Channel.findOne({
-        where: { name: forward.title },
-      });
-      if (data) {
-        await ctx.telegram.sendMessage(
-          id,
-          `Siz muvaffaqiyatli ulandingiz
-        ${data.name} kanali.
-        
-        Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
-        tegishli tugmani bosing.`,
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: "Tarif Rejasini yaratish",
-                    callback_data: "newTarif",
-                  },
-                ],
-                [{ text: "Bekor Qilish", callback_data: "cancel" }],
-              ],
-            },
-          }
-        );
-      }
-    }
-  } else {
-    const user = await User.findOne({ where: { telegramId: id, activ: true } });
-    const proyektOp = await proyekt.findAll({
-      where: {
-        userId: user.id,
-        activ: true,
-      },
-      order: [["createdAt", "DESC"]],
-    });
-    const proyektId = proyektOp[0].dataValues.id;
-    const channelData = await Channel.findOne({
-      where: { name: text, userId: user.id, activ: true, type: "group" },
-    });
-
-    const channel = await Channel.update(
-      {
-        proyektId,
-      },
-      {
-        where: {
-          id: channelData.id,
-        },
-      }
-    );
-  }
-
-  const data = await Channel.findOne({
-    where: { name: text },
-  });
-
-  if (data) {
-    await ctx.telegram.sendMessage(
-      id,
-      `Siz muvaffaqiyatli ulandingiz
-    ${data.name} Guruhi.
-    
-    Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
-    tegishli tugmani bosing.`,
-      {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "Tarif Rejasini yaratish",
-                callback_data: "newTarif",
-              },
-            ],
-            [{ text: "Bekor Qilish", callback_data: "cancel" }],
-          ],
-        },
-      }
-    );
-  }
+  Connections.textFunc(ctx, User, proyekt, Channel);
 });
 
 Connection.action("newTarif", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const dataArr = JSON.parse(fs.readFileSync("./currency.json", "utf-8"));
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Valyutani tanlang",
-    {
-      reply_markup: {
-        inline_keyboard: dataArr,
-      },
-    }
-  );
-  return ctx.wizard.next();
+  await Connections.NewTarif(ctx);
 });
 Connection.action("cancel", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = ctx.update.callback_query.id;
-  const messageId = ctx.update.callback_query.message?.message_id;
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Yangi Proyekt Yaratish",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.back().back().back();
+  await Connections.Cancel(ctx);
 });
 
 const tarif = new Composer();
 tarif.on("callback_query", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const data = ctx.update.callback_query.data;
-  const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const proyektOp = await proyekt.findAll({
-    where: {
-      userId: user.id,
-      activ: true,
-    },
-    order: [["createdAt", "DESC"]],
-  });
-  console.log(proyektOp);
-  const proyektId = proyektOp[0].dataValues.id;
-  const tarif = await Tarif.create({
-    userId: user.id,
-    proyektId,
-    currency: data,
-  });
-  console.log(tarif);
-  if (tarif) {
-    await ctx.telegram.editMessageText(
-      id,
-      messageId,
-      updateId,
-      "2/5 Tarif nomini kiriting"
-    );
-    return ctx.wizard.next();
-  }
+  await Tarifs.calBack(ctx, User, proyekt, Tarif);
 });
 
 const tarifName = new Composer();
 tarifName.on("text", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const messageId = ctx.update.message.message_id;
-  const text = ctx.update.message.text;
-  const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  console.log(user.id);
-  const tarifOp = await Tarif.findAll({
-    where: { userId: user.id },
-    order: [["createdAt", "DESC"]],
-  });
-  console.log(tarifOp);
-  const tarifId = tarifOp[0]?.dataValues.id;
-  if (!tarifId) {
-    return await ctx.telegram.sendMessage(
-      id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
-    );
-  }
-
-  console.log(tarifId);
-  const tarif = await Tarif.update(
-    {
-      name: text,
-    },
-    {
-      where: {
-        id: tarifId,
-      },
-    }
-  );
-  const data = await Tarif.findOne({ where: { id: tarifId } });
-
-  await ctx.telegram.sendMessage(
-    id,
-    `Tarif nomi muvaffaqiyatli saqlandi <b>${text}</b>\nTarif summasini kiriting (min: 1000 ${data.currency})`,
-    {
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Proyektni Bekor qilish",
-              callback_data: "cancel",
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.next();
+  await tarifNames.textFunc(ctx, User, proyekt, Channel);
 });
 
 const currency = new Composer();

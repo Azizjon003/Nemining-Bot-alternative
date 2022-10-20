@@ -55,3 +55,59 @@
 //   }
 //   ctx.scene.enter("sceneWizard");
 // });
+
+const textFunc = async (ctx: any, User: any, Tarif: any) => {
+  const id = ctx.update.message.from.id;
+  const messageId = ctx.update.message.message_id;
+  const text = ctx.update.message.text;
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  console.log(user.id);
+  const tarifOp = await Tarif.findAll({
+    where: { userId: user.id },
+    order: [["createdAt", "DESC"]],
+  });
+  console.log(tarifOp);
+  const tarifId = tarifOp[0]?.dataValues.id;
+  if (!tarifId) {
+    return await ctx.telegram.sendMessage(
+      id,
+      "Tarif rejasini yaratishda xatolik yuz berdi"
+    );
+  }
+
+  console.log(tarifId);
+  const tarif = await Tarif.update(
+    {
+      name: text,
+    },
+    {
+      where: {
+        id: tarifId,
+      },
+    }
+  );
+  const data = await Tarif.findOne({ where: { id: tarifId } });
+
+  await ctx.telegram.sendMessage(
+    id,
+    `Tarif nomi muvaffaqiyatli saqlandi <b>${text}</b>\nTarif summasini kiriting (min: 1000 ${data.currency})`,
+    {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Proyektni Bekor qilish",
+              callback_data: "cancel",
+            },
+          ],
+        ],
+      },
+    }
+  );
+  return ctx.wizard.next();
+};
+
+module.exports = {
+  textFunc,
+};

@@ -35,7 +35,7 @@ const Donat = async (ctx: any) => {
   });
   return ctx.wizard.next();
 };
-const Cancel = async (ctx: any) => {
+const Cancels = async (ctx: any) => {
   // console.log(ctx);
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
@@ -67,5 +67,5 @@ const Cancel = async (ctx: any) => {
 module.exports = {
   Money,
   Donat,
-  Cancel,
+  Cancels,
 };
