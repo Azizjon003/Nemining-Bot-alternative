@@ -94,6 +94,11 @@ class botFather {
     bot.on("callback_query", async (ctx) => {
       const id = ctx.update.callback_query.from.id;
       const data = ctx.update.callback_query.data;
+
+      const updateId = String(ctx.update.callback_query.id);
+      const messageId: number = Number(
+        ctx.update.callback_query.message?.message_id
+      );
       if (data == tarif.name) {
         const link = await this.fatherBot.telegram.createChatInviteLink(
           kanal.telegramId,
@@ -107,8 +112,25 @@ class botFather {
           10000,
           1
         );
-        console.log(link);
-        console.log(linl);
+        ctx.telegram.editMessageText(
+          id,
+          messageId,
+          updateId,
+          `Kanalga ulanishingiz mumkin!!!`,
+          {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: `Tarif: ${tarif.name}`,
+                    url: `${linl}`,
+                  },
+                ],
+                [{ text: "Tarifni bekor qilish", callback_data: "cancel" }],
+              ],
+            },
+          }
+        );
       }
     });
 
