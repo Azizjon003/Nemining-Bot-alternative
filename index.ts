@@ -407,10 +407,7 @@ Connection.on("text", async (ctx: any) => {
       }
     }
   } else {
-    const user = await User.findOne({
-      telegramId: id,
-      activ: true,
-    });
+    const user = await User.findOne({ where: { telegramId: id, activ: true } });
     const proyektOp = await proyekt.findAll({
       where: {
         userId: user.id,
@@ -517,7 +514,7 @@ tarif.on("callback_query", async (ctx: any) => {
     ctx.update.callback_query.message?.message_id
   );
   const data = ctx.update.callback_query.data;
-  const user = await User.findOne({ telegramId: id, activ: true });
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
   const proyektOp = await proyekt.findAll({
     where: {
       userId: user.id,
@@ -525,6 +522,7 @@ tarif.on("callback_query", async (ctx: any) => {
     },
     order: [["createdAt", "DESC"]],
   });
+  console.log(proyektOp);
   const proyektId = proyektOp[0].dataValues.id;
   const tarif = await Tarif.create({
     userId: user.id,
@@ -548,7 +546,8 @@ tarifName.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const messageId = ctx.update.message.message_id;
   const text = ctx.update.message.text;
-  const user = await User.findOne({ telegramId: id, activ: true });
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  console.log(user.id);
   const tarifOp = await Tarif.findAll({
     where: { userId: user.id },
     order: [["createdAt", "DESC"]],
@@ -561,6 +560,8 @@ tarifName.on("text", async (ctx: any) => {
       "Tarif rejasini yaratishda xatolik yuz berdi"
     );
   }
+
+  console.log(tarifId);
   const tarif = await Tarif.update(
     {
       name: text,
@@ -626,13 +627,14 @@ currency.on("text", async (ctx: any) => {
     return await ctx.telegram.sendMessage(id, "Iltimos son kiriting");
   }
   console.log(cli.red(text));
-  const user = await User.findOne({ telegramId: id, activ: true });
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  console.log(user.id);
   const tarifOp = await Tarif.findAll({
     where: { userId: user.id },
     order: [["createdAt", "DESC"]],
   });
   const tarifId = tarifOp[0].dataValues.id;
-
+  console.log(tarifId);
   if (!tarifId) {
     return await ctx.telegram.sendMessage(
       id,
@@ -674,7 +676,7 @@ description.on("callback_query", async (ctx: any) => {
     ctx.update.callback_query.message?.message_id
   );
   const data = ctx.update.callback_query.data;
-  const user = await User.findOne({ telegramId: id, activ: true });
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
   const tarifOp = await Tarif.findAll({ where: { userId: user.id } });
   const tarifId = tarifOp[0].dataValues.id;
   if (!tarifId) {
@@ -800,11 +802,14 @@ botConfirm.on("text", async (ctx: any) => {
     const botullo = new botFather(message, bot);
     botullo.start();
 
-    const user = await User.findOne({ telegramId: id, activ: true });
+    const user = await User.findOne({ where: { telegramId: id, activ: true } });
+    console.log(user);
     const project = await proyekt.findAll({
       where: { userId: user.id },
       order: [["createdAt", "DESC"]],
     });
+    console.log(project);
+
     const projectId = project[0].dataValues.id;
     const projectUpdate = await proyekt.update(
       {
