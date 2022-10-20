@@ -8,7 +8,7 @@ const User = db.user;
 const proyekt = db.proyekt;
 const Tarif = db.tarif;
 const Channel = db.channel;
-
+const xato = require("./utility/kerakli");
 interface forward_from {
   id: bigint;
   title: string;
@@ -16,6 +16,11 @@ interface forward_from {
   username: string;
   first_name: string;
 }
+
+/** Composerlarni FUnksiya Funksiya qilib Olayapman*/
+const newPro = require("./controller/newProyekt");
+const newProyekts = require("./controller/newWizart");
+const proyektOptions = require("./controller/proyektOption");
 dotenv.config({ path: ".env" });
 require("./model");
 
@@ -26,182 +31,40 @@ const bot = new Telegraf(TOKEN);
 const newWizart = new Composer();
 
 newWizart.hears("Yordam", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  ctx.telegram.sendMessage(
-    id,
-    `NEMILIN BOT\n\n<i>Qo'llab-quvvatlash:</i> @Coder_aa\n\n<i>Rasmiy kanal:</i> @musicsnewsuz\n\n<i>Sizning ID raqamingiz:</i> <code>${id}</code>`,
-    {
-      parse_mode: "HTML",
-    }
-  );
-  // ctx.scene.enter("sceneWizard");
+  await newProyekts.Yordam(ctx);
 });
-
-newWizart.hears("Proyektlar", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  // console.log(user);
-  if (!user) {
-    ctx.telegram.sendMessage(id, `Siz ro'yhatdan o'tmagansiz!`, {
-      parse_mode: "HTML",
-    });
-  }
-  let text = "";
-  const userProyekt = await proyekt.findAll({
-    where: { userId: user.id, activ: true },
-  });
-  // console.log(userProyekt);
-  for (let i = 0; i < userProyekt.length; i++) {
-    text = String(userProyekt[i].dataValues.name) + "\n" + text;
-  }
-  await ctx.telegram.sendMessage(
-    id,
-    `Sizning loyihalaringiz ro'yxati: <i>${text || ""}</i> \n`,
-    {
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Yangi Proyekt Yaratish",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.next();
+newWizart.hears("Proyektlar", async (ctx) => {
+  await newProyekts.Proyektlar(ctx, User, proyekt);
 });
 newWizart.hears("To'lovlar", async (ctx: any) => {
-  const text = `<i>To'lovlar bo'limi hozircha ishga tushirilmagan! Yaqin kunlarda ishga tushiramiz</i>`;
-  const id = ctx.update.message.from.id;
-  ctx.telegram.sendMessage(id, text, {
-    parse_mode: "HTML",
-  });
+  await newProyekts.Tolovlar(ctx);
 });
-newWizart.hears("Sozlamalar", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const text = `<i>Sozlamalar bo'limi hozircha ishga tushirilmagan! Yaqin kunlarda ishga tushiramiz</i>`;
-  ctx.telegram.sendMessage(id, text, {
-    parse_mode: "HTML",
-  });
+newWizart.hears("Sozlamalar", async (ctx) => {
+  await newProyekts.Sozlamalar(ctx);
 });
-
-newWizart.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const txt = ctx.update.message.text;
-  const text = `Bunaqa buyruq mavjud emas!`;
-  ctx.telegram.sendMessage(id, text, {});
+newWizart.hears(/\b[a-zA-Z0-9]\b/gu, async (ctx: any) => {
+  await xato(ctx);
 });
-
 const newProyekt = new Composer();
 newProyekt.action("newproyekt", async (ctx: any) => {
-  const updateId = ctx.update.callback_query.id;
-  const messageId = ctx.update.callback_query.message?.message_id;
-
-  const id = ctx.update.callback_query.from.id;
-
-  const text = `💁🏻‍♂️ Siz qanday loyiha yaratmoqchisiz?\n- Pulli obuna: shaxsiy kanal yoki guruhingizga pullik obunani tashkil qilish\n- Donat: Donat qabul qilishni tashkil etish`;
-
-  ctx.telegram.callB;
-  ctx.telegram.editMessageText(id, messageId, updateId, text, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "Pulli obuna", callback_data: "money" },
-          { text: "Donat", callback_data: "donat" },
-        ],
-        [{ text: "Obunani Bekor qilish", callback_data: "cancel" }],
-      ],
-    },
-  });
-  return ctx.wizard.next();
+  await newPro.newProject(ctx);
 });
-
-newProyekt.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const txt = ctx.update.message.text;
-  if (txt == "/start") {
-    return ctx.scene.leave();
-  }
-  const text = `Bunaqa buyruq mavjud emas!.Loyiha yaratish uchun /start ni bosing`;
-  ctx.telegram.sendMessage(id, text, {});
+newProyekt.hears(/\b[a-zA-Z0-9]/gu, async (ctx: any) => {
+  await newPro.xatolar(ctx);
 });
 const proyektOption = new Composer();
 proyektOption.action("money", async (ctx: any) => {
-  const text = `ℹ️ <i>Agar biror bosqichda xatoga yo'l qo'ysangiz - loyiha yaratishning barcha bosqichlaridan o'ting.
-  Keyin har qanday sozlamani o'zgartirishingiz mumkin.</i>
-  <b>Yangi loyiha nomini kiriting:
-  Misol => Loyiha:Nomi
-  </b>`;
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  ctx.telegram.editMessageText(id, messageId, updateId, text, {
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [[{ text: "Bekor qilish", callback_data: "cancel" }]],
-    },
-  });
-  return ctx.wizard.next({
-    state: "E kallangga ",
-  });
+  await proyektOptions.Money(ctx);
 });
 proyektOption.action("donat", async (ctx: any) => {
-  const id = ctx.update.callback_query.from.id;
-  const updateId = String(ctx.update.callback_query.id);
-  const messageId: number = Number(
-    ctx.update.callback_query.message?.message_id
-  );
-  const text = `ℹ️ <i>Loyiha Davom ettirilmoqda...</i>`;
-  ctx.telegram.editMessageText(id, messageId, updateId, text, {
-    parse_mode: "HTML",
-    reply_markup: {
-      inline_keyboard: [[{ text: "Bekor qilish", callback_data: "cancel" }]],
-    },
-  });
-  return ctx.wizard.next();
+  await proyektOptions.Donat(ctx);
 });
 proyektOption.action("cancel", async (ctx: any) => {
-  // console.log(ctx);
-  const id = ctx.update.callback_query.from.id;
-  const updateId = ctx.update.callback_query.id;
-  const messageId = ctx.update.callback_query.message?.message_id;
-  await ctx.telegram.editMessageText(
-    id,
-    messageId,
-    updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Yangi Proyekt Yaratish",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
-  );
-  return ctx.wizard.back().back();
-
-  // ctx.telegram.editMessageReplyMarkup(id,messageId,,);
-  // await ctx.deleteMessage();
+  await proyektOptions.Cancel(ctx);
 });
 
 proyektOption.hears(/b[a-zA-Z0-9]+b/gu, async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const txt = ctx.update.message.text;
-  if (txt == "/start") {
-    return ctx.scene.leave();
-  }
-  const text = `Bunaqa buyruq mavjud emas!.Loyiha yaratish uchun /start ni bosing`;
-  ctx.telegram.sendMessage(id, text, {});
+  await newPro.xatolar(ctx);
 });
 const option = new Composer();
 option.on("text", async (ctx: any) => {
