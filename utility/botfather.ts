@@ -27,22 +27,23 @@ class botFather {
     this.fatherBot = fatherBot;
   }
   async start() {
-    let kanal = {
-      id: 1,
-      name: "test",
-      telegramId: 1,
-      type: "channel",
-      userId: 1,
-      proyektId: 1,
-      activ: true,
-    } as Kanal;
-    let tarif = {
-      id: 1,
-      name: "test",
-      userId: 1,
-      proyektId: 1,
-      activ: true,
-    } as Tarif;
+    let nameTarif: string = "sd";
+    // let kanal = {
+    //   id: 1,
+    //   name: "test",
+    //   telegramId: 1,
+    //   type: "channel",
+    //   userId: 1,
+    //   proyektId: 1,
+    //   activ: true,
+    // } as Kanal;
+    // let tarif = {
+    //   id: 1,
+    //   name: "test",
+    //   userId: 1,
+    //   proyektId: 1,
+    //   activ: true,
+    // } as Tarif;
 
     const bot = new Telegraf(this.token);
     bot.start(async (ctx: any) => {
@@ -53,12 +54,14 @@ class botFather {
           token: token,
         },
       });
-      tarif = await Tarif.findOne({
+      console.log(project);
+      const tarif = await Tarif.findOne({
         where: {
           proyektId: project.id,
         },
       });
-      kanal = await Kanal.findOne({
+      nameTarif = tarif.name;
+      let kanal = await Kanal.findOne({
         where: {
           proyektId: project.id,
         },
@@ -76,8 +79,8 @@ class botFather {
         },
       });
     });
-    console.log(tarif);
-    bot.action(`${tarif.name}`, async (ctx) => {
+
+    bot.action(`${nameTarif}`, async (ctx) => {
       console.log("e kalla");
       console.log(ctx);
     });
@@ -86,6 +89,25 @@ class botFather {
       const name =
         ctx.update.callback_query.from.username ||
         ctx.update.callback_query.from.first_name;
+
+      const token = ctx.telegram.token;
+      const project = await Project.findOne({
+        where: {
+          token: token,
+        },
+      });
+      const tarif = await Tarif.findOne({
+        where: {
+          proyektId: project.id,
+        },
+      });
+      nameTarif = tarif.name;
+      let kanal = await Kanal.findOne({
+        where: {
+          proyektId: project.id,
+        },
+      });
+
       const text = `Sizning <b> <i>${kanal.name}</i></b> ${kanal.type}ingizga ulanish bekor qilindi`;
       ctx.telegram.sendMessage(id, text, {
         parse_mode: "HTML",
@@ -94,7 +116,23 @@ class botFather {
     bot.on("callback_query", async (ctx) => {
       const id = ctx.update.callback_query.from.id;
       const data = ctx.update.callback_query.data;
-
+      const token = ctx.telegram.token;
+      const project = await Project.findOne({
+        where: {
+          token: token,
+        },
+      });
+      const tarif = await Tarif.findOne({
+        where: {
+          proyektId: project.id,
+        },
+      });
+      nameTarif = tarif.name;
+      let kanal = await Kanal.findOne({
+        where: {
+          proyektId: project.id,
+        },
+      });
       const updateId = String(ctx.update.callback_query.id);
       const messageId: number = Number(
         ctx.update.callback_query.message?.message_id

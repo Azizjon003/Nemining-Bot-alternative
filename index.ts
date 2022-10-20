@@ -704,7 +704,9 @@ description.on("callback_query", async (ctx: any) => {
     where: { userId: user.id },
     order: [["createdAt", "DESC"]],
   });
-  const name = channel.name;
+  console.log(channel);
+  const name = channel?.name;
+
   await ctx.telegram.editMessageText(
     id,
     messageId,
@@ -714,6 +716,7 @@ description.on("callback_query", async (ctx: any) => {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
+          [{ text: "Yana Tarif reja qo'shish", callback_data: "newtarif" }],
           [{ text: "Tasdiqlash", callback_data: "confirm" }],
           [{ text: "Bekor qilish", callback_data: "cancel" }],
         ],
@@ -724,7 +727,26 @@ description.on("callback_query", async (ctx: any) => {
 });
 
 const botConfirm = new Composer();
-
+Connection.action("newtarif", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const dataArr = JSON.parse(fs.readFileSync("./currency.json", "utf-8"));
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Valyutani tanlang",
+    {
+      reply_markup: {
+        inline_keyboard: dataArr,
+      },
+    }
+  );
+  return ctx.wizard.back().back().back().back();
+});
 Connection.action("cancel", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
@@ -769,6 +791,7 @@ botConfirm.on("callback_query", async (ctx: any) => {
   }
   // return ctx.wizard.next();
 });
+
 botConfirm.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;

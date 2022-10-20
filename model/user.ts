@@ -12,7 +12,7 @@ const User = (sequelize: any, DataTypes: any) => {
         allowNull: false,
       },
       telegramId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: false,
       },
       role: {
