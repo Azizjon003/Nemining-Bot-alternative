@@ -24,7 +24,12 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
   });
   // console.log(userProyekt);
   for (let i = 0; i < userProyekt.length; i++) {
-    text = String(userProyekt[i].dataValues.name) + "\n" + text;
+    text =
+      userProyekt[i].dataValues.id +
+      ": " +
+      String(userProyekt[i].dataValues.name) +
+      "\n" +
+      text;
   }
   await ctx.telegram.sendMessage(
     id,
@@ -37,6 +42,12 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
             {
               text: "Yangi Proyekt Yaratish",
               callback_data: `newproyekt`,
+            },
+          ],
+          [
+            {
+              text: "Proyektlarni o'zgartirish",
+              callback_data: "editproyekt",
             },
           ],
         ],

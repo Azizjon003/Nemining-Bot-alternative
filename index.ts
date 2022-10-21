@@ -53,6 +53,12 @@ const newProyekt = new Composer();
 newProyekt.action("newproyekt", async (ctx: any) => {
   await newPro.newProject(ctx);
 });
+newProyekt.action("editproyekt", async (ctx: any) => {
+  await newPro.editProyekt(ctx, User, proyekt);
+});
+newProyekt.on("callback_query", async (ctx: any) => {
+  await newPro.callBackFunc(ctx, User, proyekt);
+});
 newProyekt.hears(/\b[a-zA-Z0-9]/gu, async (ctx: any) => {
   await newPro.xatolar(ctx);
 });
@@ -65,6 +71,10 @@ proyektOption.action("donat", async (ctx: any) => {
 });
 proyektOption.action("cancel", async (ctx: any) => {
   await proyektOptions.Cancels(ctx);
+});
+
+proyektOption.on("text", async (ctx: any) => {
+  await newPro.editName(ctx, User, proyekt);
 });
 
 proyektOption.hears(/\b[a-zA-Z0-9]+/gu, async (ctx: any) => {
@@ -195,7 +205,9 @@ const stage: any = new Scenes.Stage([menuSchema]);
 bot.use(session());
 bot.use(stage.middleware());
 const start = require("./controller/start");
-bot.start(start, User);
+bot.start(async (ctx: any) => {
+  await start.start(ctx, User);
+});
 const mychat = require("./controller/mychat");
 bot.on("my_chat_member", async (ctx: any) => {
   await mychat.mychat(ctx, User, Channel);
