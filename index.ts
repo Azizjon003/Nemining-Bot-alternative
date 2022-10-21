@@ -194,43 +194,8 @@ const menuSchema: any = new Scenes.WizardScene(
 const stage: any = new Scenes.Stage([menuSchema]);
 bot.use(session());
 bot.use(stage.middleware());
-bot.start(async (ctx: any) => {
-  // console.log(ctx.telegram);
-  const name =
-    ctx.update.message.from.username || ctx.update.message.from.first_name;
-  const id = ctx.update.message.from.id;
-
-  let user = await User.findOne({
-    where: {
-      telegramId: id,
-    },
-  });
-  // console.log(user);
-  if (!user) {
-    user = await User.create({
-      username: name,
-      telegramId: id,
-    });
-  } else {
-    // await User.update({ username: name }, { where: { telegramId: id } });
-  }
-  // console.log(user);
-
-  ctx.telegram.sendMessage(
-    id,
-    `🖐 Xush kelibsiz, ${name}! Kanalni monetizatsiya qilish haqida o'ylab ko'rganmisiz? Yoki xayr-ehsonlarni ulashni xohlaysizmi? :)`,
-    {
-      reply_markup: {
-        keyboard: [
-          [{ text: "Proyektlar" }, { text: "To'lovlar" }],
-          [{ text: "Sozlamalar" }, { text: "Yordam" }],
-        ],
-        resize_keyboard: true,
-      },
-    }
-  );
-  return ctx.scene.enter("sceneWizard");
-});
+const start = require("./controller/start");
+bot.start(start, User);
 const mychat = require("./controller/mychat");
 bot.on("my_chat_member", async (ctx: any) => {
   await mychat.mychat(ctx, User, Channel);
