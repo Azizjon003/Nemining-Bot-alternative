@@ -94,6 +94,10 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
           [
             { text: "Proyekt nomi", callback_data: `name:${proyekts.id}` },
             { text: "Holati", callback_data: `status:${proyekts.id}` },
+            {
+              text: "Tariflarni ko'rish",
+              callback_data: `tarif:${proyekts.id}`,
+            },
           ],
         ],
       },
@@ -207,10 +211,56 @@ const editName = async (ctx: any, User: any, proyekt: any) => {
   ctx.telegram.sendMessage(id, "Proyekt nomi o'zgartirildi");
   return ctx.scene.leave();
 };
+const tarifEdit = async (ctx: any, User: any, proyekt: any, Tarif: any) => {
+  const updateId = ctx.update.callback_query.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  const id = ctx.update.callback_query.from.id;
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  const data = ctx.update.callback_query.data;
+  const proyektId = data.split(":")[1];
+  console.log(proyektId);
+  const tarifs = await Tarif.findAll({
+    where: {
+      proyektId: proyektId,
+    },
+  });
+  console.log(tarifs);
+  let arr: {
+    text: string;
+    callback_data: string;
+  }[][] = [];
+  tarifs.forEach((item: any) => {
+    let arrcha: { text: string; callback_data: string }[] = [];
+    let son = 0;
+
+    if (son < 3) {
+      arrcha.push({
+        text: String(item.name),
+        callback_data: String(item.id),
+      });
+
+      arr.push(arrcha);
+      arrcha = [];
+    } else {
+      son = 0;
+      arrcha = [];
+    }
+    son++;
+  });
+
+  let txt = `Tariflarni tanlang: `;
+  ctx.telegram.editMessageText(id, messageId, updateId, txt, {
+    reply_markup: {
+      inline_keyboard: arr,
+    },
+  });
+  return ctx.wizard.next();
+};
 module.exports = {
   newProject,
   xatolar,
   editProyekt,
   callBackFunc,
   editName,
+  tarifEdit,
 };

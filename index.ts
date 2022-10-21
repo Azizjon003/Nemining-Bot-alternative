@@ -56,6 +56,9 @@ newProyekt.action("newproyekt", async (ctx: any) => {
 newProyekt.action("editproyekt", async (ctx: any) => {
   await newPro.editProyekt(ctx, User, proyekt);
 });
+newProyekt.action(/\btarif/, async (ctx: any) => {
+  await newPro.tarifEdit(ctx, User, proyekt, Tarif);
+});
 newProyekt.on("callback_query", async (ctx: any) => {
   await newPro.callBackFunc(ctx, User, proyekt);
 });
@@ -75,6 +78,9 @@ proyektOption.action("cancel", async (ctx: any) => {
 
 proyektOption.on("text", async (ctx: any) => {
   await newPro.editName(ctx, User, proyekt);
+});
+proyektOption.on("callback_query", async (ctx) => {
+  ctx.reply("yaxshi bo'ladi");
 });
 
 proyektOption.hears(/\b[a-zA-Z0-9]+/gu, async (ctx: any) => {

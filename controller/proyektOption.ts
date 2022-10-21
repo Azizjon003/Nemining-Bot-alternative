@@ -64,6 +64,36 @@ const Cancels = async (ctx: any) => {
   // await ctx.deleteMessage();
 };
 
+const editTarifOption = async (
+  ctx: any,
+  User: any,
+  proyekt: any,
+  Tarif: any
+) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = ctx.update.callback_query.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  const data = ctx.update.callback_query.data;
+  if (Number(data)) {
+    const datas = await Tarif.findOne({
+      id: data,
+    });
+    const text = `Tarif nomi <code>${datas?.name}</code>`;
+    ctx.telegram.editMessageText(id, messageId, updateId, text, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Yangi Proyekt Yaratish",
+              callback_data: `newproyekt`,
+            },
+          ],
+        ],
+      },
+    });
+  }
+};
+
 module.exports = {
   Money,
   Donat,
