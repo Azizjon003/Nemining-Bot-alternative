@@ -4,7 +4,10 @@ const mychat = async (ctx: any, User: any, Channel: any) => {
   const chatId = ctx.update.my_chat_member.chat.id;
   const test = ctx.update.my_chat_member.new_chat_member.status;
   const name = ctx.update.my_chat_member.chat.title;
-  const chatType = ctx.update.my_chat_member.chat.type;
+  let chatType = ctx.update.my_chat_member.chat.type;
+  if (chatType == "supergroup") {
+    chatType = "group";
+  }
   const user = await User.findOne({
     where: { telegramId: userId },
   });

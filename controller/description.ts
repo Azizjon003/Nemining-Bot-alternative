@@ -14,9 +14,11 @@ const callBack = async (ctx: any, User: any, Tarif: any, Channel: any) => {
       "Tarif rejasini yaratishda xatolik yuz berdi"
     );
   }
+  console.log(data);
+  console.log(tarifId);
   const tarif = await Tarif.update(
     {
-      time: data,
+      expires: data,
     },
     {
       where: {

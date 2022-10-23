@@ -86,7 +86,7 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       },
     });
 
-    let txt = `Proyekt nomi <b><i>${proyekts.name}</i></b>\n Qaysi qismini o'zgartirmoqchisiz?`;
+    let txt = `Proyekt nomi <b><i>${proyekts.name}</i></b>\n Holati <code>${proyekts.activ}</code>\nQaysi qismini o'zgartirmoqchisiz?`;
     ctx.telegram.editMessageText(id, messageId, updateId, txt, {
       parse_mode: "HTML",
       reply_markup: {
@@ -111,14 +111,23 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
         id: proyektId,
       },
     });
-
-    let txt = `Proyekt nomini kiriting Hozirgi nomi ${proyekts.name}.Proyekt Nomini quyidagi holatda kiriting\n<b><i>Proyektnomi:Proyektyanginomi</i></b>`;
+    const upt = await User.update(
+      {
+        editTarif: proyekts.id,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      }
+    );
+    let txt = `Proyekt nomini kiriting Hozirgi nomi<code> ${proyekts.name}</code>.Proyektning yangi nomini kiriting`;
 
     ctx.telegram.editMessageText(id, messageId, updateId, txt, {
       parse_mode: "HTML",
     });
 
-    return ctx.wizard.next();
+    return ctx.wizard.selectStep(11);
   }
   if (data.includes("status")) {
     const proyektId = data.split(":")[1];
@@ -236,7 +245,7 @@ const tarifEdit = async (ctx: any, User: any, proyekt: any, Tarif: any) => {
     if (son < 3) {
       arrcha.push({
         text: String(item.name),
-        callback_data: String(item.id),
+        callback_data: String(`tarif:${item.id}`),
       });
 
       arr.push(arrcha);

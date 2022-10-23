@@ -24,6 +24,9 @@ const User = (sequelize: any, DataTypes: any) => {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
+      editTarif: {
+        type: DataTypes.STRING,
+      },
     },
     {
       tableName: "user",

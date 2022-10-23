@@ -1,4 +1,5 @@
 import fs from "fs";
+import cli from "cli-color";
 const Cancel = async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
@@ -44,7 +45,8 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
       "Tarif rejasini yaratishda xatolik yuz berdi"
     );
   }
-  console.log(tarifId);
+  console.log(cli.blue(tarifId));
+  console.log(cli.red(text));
   const tarif = await Tarif.update(
     {
       price: text,
@@ -55,6 +57,7 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
       },
     }
   );
+  console.log(tarif);
 
   const dataArr = JSON.parse(
     fs.readFileSync(__dirname + "/date.json", "utf-8")
