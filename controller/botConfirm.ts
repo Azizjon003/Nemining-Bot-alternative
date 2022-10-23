@@ -19,7 +19,7 @@ const newTarif = async (ctx: any) => {
       },
     }
   );
-  return ctx.wizard.back().back().back().back();
+  return ctx.wizard.selectStep(5);
 };
 
 const Cancel = async (ctx: any) => {

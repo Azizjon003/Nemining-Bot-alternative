@@ -153,10 +153,10 @@ description.on("callback_query", async (ctx: any) => {
 
 const botConfirm = new Composer();
 const botConfirms = require("./controller/botConfirm");
-Connection.action("newtarif", async (ctx: any) => {
-  await Connections.NewTarif(ctx);
+botConfirm.action("newtarif", async (ctx: any) => {
+  await botConfirms.newTarif(ctx);
 });
-Connection.action("cancel", async (ctx: any) => {
+botConfirm.action("cancel", async (ctx: any) => {
   await Connections.Cancel(ctx);
 });
 botConfirm.on("callback_query", async (ctx: any) => {
