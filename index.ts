@@ -7,6 +7,7 @@ const db = require("./model/index");
 const User = db.user;
 const proyekt = db.proyekt;
 const Tarif = db.tarif;
+const Payment = db.payment;
 const Channel = db.channel;
 const xato = require("./utility/kerakli");
 interface forward_from {
@@ -41,7 +42,7 @@ newWizart.hears("Proyektlar", async (ctx) => {
   await newProyekts.Proyektlar(ctx, User, proyekt);
 });
 newWizart.hears("To'lovlar", async (ctx: any) => {
-  await newProyekts.Tolovlar(ctx);
+  await newProyekts.Tolovlar(ctx, User);
 });
 newWizart.hears("Sozlamalar", async (ctx) => {
   await newProyekts.Sozlamalar(ctx);
@@ -296,6 +297,98 @@ editProjectName.on("text", async (ctx: any) => {
   );
   return ctx.scene.leave();
 });
+const tolov = new Composer();
+tolov.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const message = ctx.update.message.text;
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  const shart = user.editTarif.split(":")[0];
+  if (shart == "payment") {
+    const shart1 = user.editTarif.split(":")[1];
+    if (shart1 == "name") {
+      let payment = await Payment.create({
+        tarif: message,
+      });
+      let upt = await User.update(
+        {
+          paymentId: payment.id,
+          editTarif: "payment:cardNum",
+        },
+        {
+          where: {
+            telegramId: id,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        id,
+        "O'zgarishlar saqlandi Endi Karta ramingizni kiritishingiz kerak"
+      );
+    }
+
+    if (shart1 == "cardNum") {
+      let payment = await Payment.update(
+        {
+          cardNum: message,
+        },
+        {
+          where: {
+            id: user.paymentId,
+          },
+        }
+      );
+      let upt = await User.update(
+        {
+          editTarif: "payment:email",
+        },
+        {
+          where: {
+            telegramId: id,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        id,
+        "O'zgarishlar saqlandi Endi emailingizni kiritishingiz kerak"
+      );
+    }
+
+    if (shart1 == "email") {
+      let payment = await Payment.update(
+        {
+          email: message,
+        },
+        {
+          where: {
+            id: user.paymentId,
+          },
+        }
+      );
+      let upt = await User.update(
+        {
+          editTarif: "payment:email",
+        },
+        {
+          where: {
+            telegramId: id,
+          },
+        }
+      );
+      const users = await Payment.findOne({
+        where: { id: user.paymentId },
+      });
+
+      await ctx.telegram.sendMessage(
+        id,
+        `O'zgarishlar saqlandi\n 1. Tarif Haqida ${users.tarif} \n 2. Karta raqami ${users.cardNum} \n 3. Emailingiz ${users.email}`
+      );
+      await ctx.telegram.sendMessage(id, "/start buyrug'ini bosing");
+      return ctx.scene.leave();
+    }
+  }
+});
 
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
@@ -310,7 +403,8 @@ const menuSchema: any = new Scenes.WizardScene(
   description,
   botConfirm,
   editTarifOption,
-  editProjectName
+  editProjectName,
+  tolov
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);

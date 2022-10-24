@@ -27,6 +27,14 @@ const User = (sequelize: any, DataTypes: any) => {
       editTarif: {
         type: DataTypes.STRING,
       },
+      paymentId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "payments",
+          key: "id",
+        },
+      },
     },
     {
       tableName: "user",

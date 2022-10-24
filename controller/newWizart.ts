@@ -56,12 +56,24 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
   );
   return ctx.wizard.next();
 };
-const Tolovlar = async (ctx: any) => {
-  const text = `<i>To'lovlar bo'limi hozircha ishga tushirilmagan! Yaqin kunlarda ishga tushiramiz</i>`;
+const Tolovlar = async (ctx: any, User: any) => {
+  const text = `<i>Biz boshladik.Siz bizga kerakli matnni yuboring.Ya'ni siz o'zingizning<code> karta raqamingiz</code> tarifini kiriting</i>`;
   const id = ctx.update.message.from.id;
+
+  const upt = await User.update(
+    {
+      editTarif: `payment:name`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
   ctx.telegram.sendMessage(id, text, {
     parse_mode: "HTML",
   });
+  return ctx.wizard.selectStep(12);
 };
 const Sozlamalar = async (ctx: any) => {
   const id = ctx.update.message.from.id;
