@@ -10,7 +10,7 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       await ctx.deleteMessage(messageId);
       return await ctx.telegram.sendMessage(
         id,
-        "Ommaviy Kanalni ulay olmaysiz iltimos shaxsiy kanalni ulang"
+        "Не удалось подключить общедоступный канал. Подключите частный канал."
       );
     } else {
       await ctx.deleteMessage(messageId);
@@ -35,7 +35,7 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       if (channelData.proyektId) {
         return await ctx.telegram.sendMessage(
           id,
-          "Bu kanal boshqa loyihaga ulangan,Boshqa kanalni ulashingiz mumkun"
+          "Этот канал подключен к другому проекту, вы можете подключить другой канал"
         );
       }
       const channel = await Channel.update(
@@ -54,21 +54,18 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       if (data) {
         await ctx.telegram.sendMessage(
           id,
-          `Siz muvaffaqiyatli ulandingiz
-          ${data.name} kanali.
-          
-          Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
-          tegishli tugmani bosing.`,
+          `Вы успешно подключились<code>Канал ${data.name}</code>.\nДобавьте еще один ресурс или продолжите создание тарифного плана:\nнажмите соответствующую кнопку.`,
           {
+            parse_mode: "HTML",
             reply_markup: {
               inline_keyboard: [
                 [
                   {
-                    text: "Tarif Rejasini yaratish",
+                    text: "Создание тарифного плана",
                     callback_data: "newTarif",
                   },
                 ],
-                [{ text: "Bekor Qilish", callback_data: "cancel" }],
+                [{ text: "Отмена", callback_data: "cancel" }],
               ],
             },
           }
@@ -89,7 +86,7 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       where: { name: text, userId: user.id, activ: true, type: "group" },
     });
     if (!channelData) {
-      return await ctx.telegram.sendMessage(id, "Bunday kanal mavjud emas");
+      return await ctx.telegram.sendMessage(id, "Такого канала не существует");
     }
 
     const channel = await Channel.update(
@@ -111,21 +108,19 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
   if (data) {
     await ctx.telegram.sendMessage(
       id,
-      `Siz muvaffaqiyatli ulandingiz
-      ${data.name} Guruhi.
-      
-      Boshqa resurs qo'shing yoki tarif rejasini yaratishni davom eting:
-      tegishli tugmani bosing.`,
+      `Вы успешно подключились
+      Группа <code>${data.name}</code>.Добавьте еще один ресурс или продолжите создание тарифного плана:нажмите соответствующую кнопку.`,
       {
+        parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: "Tarif Rejasini yaratish",
+                text: "Создание тарифного плана",
                 callback_data: "newTarif",
               },
             ],
-            [{ text: "Bekor Qilish", callback_data: "cancel" }],
+            [{ text: "Отмена", callback_data: "cancel" }],
           ],
         },
       }
@@ -145,7 +140,7 @@ const newTarif = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Valyutani tanlang",
+    "Выберите валюту",
     {
       reply_markup: {
         inline_keyboard: dataArr,
@@ -162,13 +157,13 @@ const Cancel = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
+    "Список ваших проектов: \n",
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Yangi Proyekt Yaratish",
+              text: "Создать новый проект",
               callback_data: `newproyekt`,
             },
           ],

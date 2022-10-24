@@ -30,7 +30,7 @@ const callBack = async (ctx: any, User: any, Tarif: any, Channel: any) => {
   if (!tarif) {
     return await ctx.telegram.sendMessage(
       id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
+      "Произошла ошибка при создании тарифного плана"
     );
   }
   const channel = await Channel.findOne({
@@ -44,14 +44,19 @@ const callBack = async (ctx: any, User: any, Tarif: any, Channel: any) => {
     id,
     messageId,
     updateId,
-    `Tarif rejasi tasdiqlandi va <b>${name}</b> kanaliga ulandi`,
+    `Тарифный план утвержден и подключен к каналу <b>${name}</b>`,
     {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Yana Tarif reja qo'shish", callback_data: "newtarif" }],
-          [{ text: "Tasdiqlash", callback_data: "confirm" }],
-          [{ text: "Bekor qilish", callback_data: "cancel" }],
+          [
+            {
+              text: "Добавить другой тарифный план",
+              callback_data: "newtarif",
+            },
+          ],
+          [{ text: "Подтверждение", callback_data: "confirm" }],
+          [{ text: "Отмена", callback_data: "cancel" }],
         ],
       },
     }

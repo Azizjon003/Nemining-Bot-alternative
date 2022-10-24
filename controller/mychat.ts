@@ -12,10 +12,7 @@ const mychat = async (ctx: any, User: any, Channel: any) => {
     where: { telegramId: userId },
   });
   if (!user) {
-    return await ctx.telegram.sendMessage(
-      chatId,
-      `Siz ro'yxatdan o'tmadingiz!`
-    );
+    return await ctx.telegram.sendMessage(chatId, `Вы не зарегистрированы!`);
   }
   // console.log(test);
   if (test == "left") {

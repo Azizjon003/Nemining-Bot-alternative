@@ -27,7 +27,7 @@ const xatolar = async (ctx: any) => {
   if (txt == "/start") {
     return ctx.scene.leave();
   }
-  const text = `Bunaqa buyruq mavjud emas!.Loyiha yaratish uchun /start ni bosing`;
+  const text = `Такой команды не существует! Нажмите /start, чтобы создать проект`;
   await ctx.telegram.sendMessage(id, text, {});
 };
 
@@ -66,7 +66,7 @@ const editProyekt = async (ctx: any, User: any, proyekt: any) => {
   });
   console.log(arr);
 
-  const text = `O'zgartirmoqchi bo'lgan loyihangizni kiriting`;
+  const text = `Введите проект, который вы хотите изменить`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     reply_markup: {
       inline_keyboard: arr,
@@ -86,16 +86,16 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       },
     });
 
-    let txt = `Proyekt nomi <b><i>${proyekts.name}</i></b>\n Holati <code>${proyekts.activ}</code>\nQaysi qismini o'zgartirmoqchisiz?`;
+    let txt = `Название проекта <b><i>${proyekts.name}</i></b>\n Статус <code>${proyekts.activ}</code>\nКакую часть вы хотите изменить?`;
     ctx.telegram.editMessageText(id, messageId, updateId, txt, {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
           [
-            { text: "Proyekt nomi", callback_data: `name:${proyekts.id}` },
-            { text: "Holati", callback_data: `status:${proyekts.id}` },
+            { text: "Проект номи", callback_data: `name:${proyekts.id}` },
+            { text: "Статус", callback_data: `status:${proyekts.id}` },
             {
-              text: "Tariflarni ko'rish",
+              text: "Посмотреть тарифы",
               callback_data: `tarif:${proyekts.id}`,
             },
           ],
@@ -121,7 +121,7 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
         },
       }
     );
-    let txt = `Proyekt nomini kiriting Hozirgi nomi<code> ${proyekts.name}</code>.Proyektning yangi nomini kiriting`;
+    let txt = `Введите название проекта Текущее имя <code> ${proyekts.name}</code> Введите новое имя для проекта`;
 
     ctx.telegram.editMessageText(id, messageId, updateId, txt, {
       parse_mode: "HTML",
@@ -137,14 +137,14 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       },
     });
 
-    let txt = `Proyekt statusini kiriting Hozirgi status ${proyekts.activ}`;
+    let txt = `Введите статус проекта Текущий статус ${proyekts.active}`;
 
     ctx.telegram.editMessageText(id, messageId, updateId, txt, {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: "Faol", callback_data: `true:${proyekts.id}` },
-            { text: "Faol emas", callback_data: `false:${proyekts.id}` },
+            { text: "Активный", callback_data: `true:${proyekts.id}` },
+            { text: "Не активный", callback_data: `false:${proyekts.id}` },
           ],
         ],
       },
@@ -164,7 +164,7 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       id,
       messageId,
       updateId,
-      "Status o'zgartirildi"
+      "Статус изменен"
     );
     return ctx.scene.leave();
   }
@@ -182,7 +182,7 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       id,
       messageId,
       updateId,
-      "Status o'zgartirildi"
+      "Статус изменен"
     );
     return ctx.scene.leave();
   }
@@ -217,7 +217,7 @@ const editName = async (ctx: any, User: any, proyekt: any) => {
     }
   );
 
-  ctx.telegram.sendMessage(id, "Proyekt nomi o'zgartirildi");
+  ctx.telegram.sendMessage(id, "Название проекта изменено");
   return ctx.scene.leave();
 };
 const tarifEdit = async (ctx: any, User: any, proyekt: any, Tarif: any) => {
@@ -257,7 +257,7 @@ const tarifEdit = async (ctx: any, User: any, proyekt: any, Tarif: any) => {
     son++;
   });
 
-  let txt = `Tariflarni tanlang: `;
+  let txt = `Выберите тарифы: `;
   ctx.telegram.editMessageText(id, messageId, updateId, txt, {
     reply_markup: {
       inline_keyboard: arr,

@@ -12,7 +12,7 @@ const newTarif = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Valyutani tanlang",
+    "Выберите валюту",
     {
       reply_markup: {
         inline_keyboard: dataArr,
@@ -30,13 +30,13 @@ const Cancel = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
+    "Список ваших проектов: \n",
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Yangi Proyekt Yaratish",
+              text: "Создать новый проект",
               callback_data: `newproyekt`,
             },
           ],
@@ -55,12 +55,12 @@ const callBack = async (ctx: any) => {
   );
   const data = ctx.update.callback_query.data;
   if (data == "confirm") {
-    const text = `Endi siz obunachilaringiz muloqot qiladigan shaxsiy botingizni ulashingiz kerak.\nBuning uchun:\n1. Botlarning otasini oching - @BotFather\n2. Yangi bot yarating (buyruq/newbot)\n3. Ota sizga shaxsiy botingizning API tokenini yuboradi (format 123456789:ASDFABC-DEF1234gh) - bu tokenni nusxalab, menga yuboring.\nMuhim! Boshqa xizmatga (yoki boshqa botlarga) ulangan botdan foydalanmang!\nMen tokenni kutyapman...`;
+    const text = `Теперь вам нужно подключить своего личного бота, с которым будут общаться ваши подписчики.\nДля этого:\n1. Откройте отца ботов - @BotFather\n2. Создайте нового бота (command/newbot)\n3. Отец отправит вам токен API вашего пользовательского бота (формат 123456789:ASDFABC-DEF1234gh) — скопируйте этот токен и отправьте мне.\nВажно! Не используйте бота, подключенного к другому сервису (или других ботов)!\nЯ жду токен...`;
     await ctx.telegram.editMessageText(id, messageId, updateId, text, {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Loyihani Bekor Qilish", callback_data: "cancel" }],
+          [{ text: "Отмена проекта", callback_data: "cancel" }],
         ],
       },
     });

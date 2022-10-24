@@ -8,13 +8,13 @@ const Cancel = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
+    "Список ваших проектов: \n",
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Yangi Proyekt Yaratish",
+              text: "Создать новый проект",
               callback_data: `newproyekt`,
             },
           ],
@@ -42,7 +42,7 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
   if (!tarifId) {
     return await ctx.telegram.sendMessage(
       id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
+      "Произошла ошибка при создании тарифного плана"
     );
   }
   console.log(cli.blue(tarifId));
@@ -65,7 +65,7 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
   console.log(dataArr);
   await ctx.telegram.sendMessage(
     id,
-    "Tarif summasi muvaffaqiyatli saqlandi,Siz Kerakli vaqtni tanlang",
+    "Сумма тарифа успешно сохранена, можно выбрать нужное время",
     {
       reply_markup: {
         inline_keyboard: dataArr,
