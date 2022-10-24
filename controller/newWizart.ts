@@ -12,12 +12,12 @@ const Yordam = async (ctx: any) => {
 const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
   const id = ctx.update.message.from.id;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  // console.log(user);
   if (!user) {
     ctx.telegram.sendMessage(id, `Siz ro'yhatdan o'tmagansiz!`, {
       parse_mode: "HTML",
     });
   }
+
   let text = "";
   const userProyekt = await proyekt.findAll({
     where: { userId: user.id, activ: true },
@@ -56,9 +56,21 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
   );
   return ctx.wizard.next();
 };
-const Tolovlar = async (ctx: any, User: any) => {
-  const text = `<i>Biz boshladik.Siz bizga kerakli matnni yuboring.Ya'ni siz o'zingizning<code> karta raqamingiz</code> tarifini kiriting</i>`;
+const Tolovlar = async (ctx: any, User: any, Payment: any) => {
   const id = ctx.update.message.from.id;
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  const payment = await Payment.findOne({
+    where: {
+      id: user.paymentId,
+    },
+  });
+  if (payment) {
+    return ctx.telegram.sendMessage(
+      id,
+      `Sizning to'lov qismingiz mavjud!!!;\nTarifi:${payment.tarif}\nKarta Raqam : ${payment.cardNum}\n Email: ${payment.email}\n`
+    );
+  }
+  const text = `<i>Biz boshladik.Siz bizga kerakli matnni yuboring.Ya'ni siz o'zingizning<code> karta raqamingiz</code> tarifini kiriting</i>`;
 
   const upt = await User.update(
     {

@@ -88,6 +88,9 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
     const channelData = await Channel.findOne({
       where: { name: text, userId: user.id, activ: true, type: "group" },
     });
+    if (!channelData) {
+      return await ctx.telegram.sendMessage(id, "Bunday kanal mavjud emas");
+    }
 
     const channel = await Channel.update(
       {

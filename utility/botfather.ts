@@ -96,7 +96,7 @@ class botFather {
           telegramId: id,
           name: name,
           proyektId: project.id,
-          kanalId: kanal.id,
+          channelId: kanal.id,
         });
       }
       ctx.telegram.sendMessage(id, text, {
@@ -111,13 +111,47 @@ class botFather {
     });
     bot.action(/\bok/, async (ctx: any) => {
       const id = ctx.update.callback_query.from.id;
-      const data = ctx.update.callback_query.data;
+      const data = ctx.update.callback_query.data.split(":")[1];
 
       const connectUser = await ConnectUser.findOne({
         where: {
-          telegramId: id,
+          telegramId: data,
         },
       });
+      const tarifId = connectUser.editTarif.split(":")[1];
+      const tarif = await Tarif.findOne({
+        where: {
+          id: tarifId,
+        },
+      });
+
+      const expires = new Date().getTime() + tarif.expires * 60 * 60 * 1000;
+
+      ConnectUser.update(
+        {
+          expiresDate: expires,
+        },
+        {
+          where: {
+            telegramId: data,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        data,
+        "Siz admin tomonidan tasdiqlandingiz.Bir necha soniya kutib turing va biz sizga kerakli ma'lumotlarni jo'natamiz"
+      );
+
+      const chatLink = await this.fatherBot.telegram.createChatInviteLink(
+        kanal.telegramId,
+        {
+          member_limit: 1,
+        }
+      );
+      console.log(chatLink);
+
+      await ctx.telegram.sendMessage(data, chatLink.invite_link);
     });
     bot.action(/\bpay/, async (ctx: any) => {
       const id = ctx.update.callback_query.from.id;
@@ -137,13 +171,21 @@ class botFather {
           id: user.paymentId,
         },
       });
-      const tarif = await Tarif.findOne({
+      const tariflar = await Tarif.findOne({
         where: {
           id: data.split("-")[1],
         },
       });
+      console.log(tariflar);
 
-      let text = `Siz <code>${tarif.name}</code> tarifini tanladingiz. <code>${tarif.name}</code>\n tarifining narxi <code>${tarif.price}</code> so'm.\n <code>${tarif.name}</code>.\nKarta ma'lumotlarini <i>${payment.tarif}</i>\n orqali to'ldiring.\n CardNum <code>${payment.cardNum}</code>.Qilgan to'lovingizni screenshot qilib yuboring.Biz adminga yuboramiz va tasdiqlanishi kutiladi.`;
+      if (!tariflar) {
+        return await ctx.telegram.sendMessage(id, "Tarif topilmadi");
+      }
+      if (!payment) {
+        return await ctx.telegram.sendMessage(id, "Payment qismini qo'shing");
+      }
+
+      let text = `Siz <code>${tariflar.name}</code> tarifini tanladingiz. <code>${tariflar.name}</code>\n tarifining narxi <code>${tariflar.price}</code> so'm.\n <code>${tariflar.name}</code>.\nKarta ma'lumotlarini <i>${payment.tarif}</i>\n orqali to'ldiring.\n CardNum <code>${payment.cardNum}</code>.Qilgan to'lovingizni screenshot qilib yuboring.Biz adminga yuboramiz va tasdiqlanishi kutiladi.`;
       ctx.telegram.editMessageText(id, messageId, updateId, text, {
         parse_mode: "HTML",
       });
@@ -172,6 +214,18 @@ class botFather {
             id: tarifId,
           },
         });
+
+        ConnectUser.update(
+          {
+            editTarif: `tarifId:${tarif.id}`,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
+
         const text = `Sizning <b> <i>${kanal.name}</i></b> ${
           kanal.type
         }ingizga ulanish uchun <b>${
@@ -231,8 +285,8 @@ class botFather {
   }
 }
 
-new botFather(
-  "5431137389:AAFraDHaa7CzCAwhj6z9z5sp9_PDtPc3q44",
-  botFather
-).start();
+// new botFather(
+//   "5431137389:AAFraDHaa7CzCAwhj6z9z5sp9_PDtPc3q44",
+//   botFather
+// ).start();
 module.exports = botFather;

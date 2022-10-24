@@ -22,12 +22,12 @@ const start = async (ctx: any, User: any) => {
 
   ctx.telegram.sendMessage(
     id,
-    `🖐 Xush kelibsiz, ${name}! Kanalni monetizatsiya qilish haqida o'ylab ko'rganmisiz? Yoki xayr-ehsonlarni ulashni xohlaysizmi? :)`,
+    `🖐 Добро пожаловать, ${name}! Вы не думали о монетизации своего канала? Или хотите подключить пожертвования? :)`,
     {
       reply_markup: {
         keyboard: [
-          [{ text: "Proyektlar" }, { text: "To'lovlar" }],
-          [{ text: "Sozlamalar" }, { text: "Yordam" }],
+          [{ text: "Проекты" }, { text: "Платежи" }],
+          [{ text: "Настройки" }, { text: "Помощь" }],
         ],
         resize_keyboard: true,
       },

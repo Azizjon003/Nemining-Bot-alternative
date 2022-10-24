@@ -42,7 +42,7 @@ newWizart.hears("Proyektlar", async (ctx) => {
   await newProyekts.Proyektlar(ctx, User, proyekt);
 });
 newWizart.hears("To'lovlar", async (ctx: any) => {
-  await newProyekts.Tolovlar(ctx, User);
+  await newProyekts.Tolovlar(ctx, User, Payment);
 });
 newWizart.hears("Sozlamalar", async (ctx) => {
   await newProyekts.Sozlamalar(ctx);

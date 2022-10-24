@@ -15,9 +15,7 @@ const Money = async (ctx: any) => {
       inline_keyboard: [[{ text: "Bekor qilish", callback_data: "cancel" }]],
     },
   });
-  return ctx.wizard.next({
-    state: "E kallangga ",
-  });
+  return ctx.wizard.next();
 };
 
 const Donat = async (ctx: any) => {
