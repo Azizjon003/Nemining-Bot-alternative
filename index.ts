@@ -35,16 +35,16 @@ const bot = new Telegraf(TOKEN);
 
 const newWizart = new Composer();
 
-newWizart.hears("Yordam", async (ctx: any) => {
+newWizart.hears("Помощь", async (ctx: any) => {
   await newProyekts.Yordam(ctx);
 });
-newWizart.hears("Proyektlar", async (ctx) => {
+newWizart.hears("Проекты", async (ctx) => {
   await newProyekts.Proyektlar(ctx, User, proyekt);
 });
-newWizart.hears("To'lovlar", async (ctx: any) => {
+newWizart.hears("Платежи", async (ctx: any) => {
   await newProyekts.Tolovlar(ctx, User, Payment);
 });
-newWizart.hears("Sozlamalar", async (ctx) => {
+newWizart.hears("Настройки", async (ctx) => {
   await newProyekts.Sozlamalar(ctx);
 });
 newWizart.hears(/\b[a-zA-Z0-9]\b/gu, async (ctx: any) => {
@@ -415,8 +415,13 @@ bot.start(async (ctx: any) => {
   await start.start(ctx, User);
 });
 const mychat = require("./controller/mychat");
+
 bot.on("my_chat_member", async (ctx: any) => {
   await mychat.mychat(ctx, User, Channel);
+});
+bot.catch((error: any) => {
+  console.log(cli.red(error));
+  bot.telegram.sendMessage("1953925296", String(error.message));
 });
 console.log("Bot is running");
 bot.launch();

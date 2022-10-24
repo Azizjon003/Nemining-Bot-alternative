@@ -1,9 +1,9 @@
 const Money = async (ctx: any) => {
-  const text = `ℹ️ <i>Agar biror bosqichda xatoga yo'l qo'ysangiz - loyiha yaratishning barcha bosqichlaridan o'ting.
-    Keyin har qanday sozlamani o'zgartirishingiz mumkin.</i>
-    <b>Yangi loyiha nomini kiriting:
-    Misol => Loyiha:Nomi
-    </b>`;
+  const text = `ℹ️ <i>Если вы ошиблись на каком-то этапе - пройдите все этапы создания проекта.
+  Затем вы можете изменить любой параметр.</i>
+  <b>Введите новое название проекта:
+  Пример => Проект:Имя
+  </b>`;
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
   const messageId: number = Number(
@@ -12,7 +12,7 @@ const Money = async (ctx: any) => {
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
-      inline_keyboard: [[{ text: "Bekor qilish", callback_data: "cancel" }]],
+      inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
     },
   });
   return ctx.wizard.next();
@@ -24,11 +24,11 @@ const Donat = async (ctx: any) => {
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
   );
-  const text = `ℹ️ <i>Loyiha Davom ettirilmoqda...</i>`;
+  const text = `ℹ️ <i>Проект в процессе...</i>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
-      inline_keyboard: [[{ text: "Bekor qilish", callback_data: "cancel" }]],
+      inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
     },
   });
   return ctx.wizard.next();
@@ -42,13 +42,13 @@ const Cancels = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
+    "Список ваших проектов: \n",
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Yangi Proyekt Yaratish",
+              text: "Создать новый проект",
               callback_data: `newproyekt`,
             },
           ],
@@ -72,22 +72,22 @@ const editTarifOption = async (
   const datas = await Tarif.findOne({
     id: data,
   });
-  const text = `Tarif nomi <code>${datas?.name}</code>\n Tarif currency <code>${datas.currency}</code>\n Tarif amal qilish muddati <code>${datas.expires}</code>\n Tarif narxi <code>${datas.price}</code>`;
+  const text = `Название тарифа <code>${datas?.name}</code>\n Валюта тарифа <code>${datas.currency}</code>\n Срок действия тарифа <code>${datas.expires}</ code >\n Тарифная цена <code>${datas.price}</code>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
         [
           {
-            text: "Nomini O'zgartirish",
+            text: "Переименовать",
             callback_data: `name:${datas.id}`,
           },
           {
-            text: "Narxini O'zgartirish",
+            text: "Изменить цену",
             callback_data: `price:${datas.id}`,
           },
           {
-            text: "Vaqtini o'zgartirish",
+            text: "Изменить время",
             callback_data: `time:${datas.id}`,
           },
         ],
@@ -116,14 +116,14 @@ const editTarifName = async (ctx: any, Tarif: any, User: any) => {
       },
     }
   );
-  const text = `Yangi nomni kiriting`;
+  const text = `Введите новое имя`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
         [
           {
-            text: "Bekor qilish",
+            text: "Отмена",
             callback_data: `cancel`,
           },
         ],
@@ -152,7 +152,7 @@ const editTarifPrice = async (ctx: any, Tarif: any, User: any) => {
       },
     }
   );
-  const text = `Yangi narxni kiriting\n Hozirgi Narx: <code>${datas.price}</code>`;
+  const text = `Введите новую цену\n Текущая цена: <code>${datas.price}</code>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
   });
@@ -184,7 +184,7 @@ const editTarifTime = async (ctx: any, Tarif: any, User: any) => {
       },
     }
   );
-  const text = `Hozirgi Muddat: <code>${datas.expires}</code>\n Yangi Muddatni kiriting(Muddatni soatlarda kiriting)`;
+  const text = `Текущий срок действия: <code>${datas.expires}</code>\n Введите новый срок действия (введите срок действия в часах)`;
 
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",

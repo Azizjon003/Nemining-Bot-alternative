@@ -71,7 +71,7 @@ class botFather {
           proyektId: project.id,
         },
       });
-      const text = `Assalomu alaykum. <code>${kanal.type}im</code> <code>${kanal.name}</code> ${kanal.type}i.<code>${kanal.name}imizga</code> ulanish uchun qiyidagi ishlarni bajaring.`;
+      const text = `Привет. <code>Мой ${kanal.type}</code> <code>${kanal.name}</code> ${kanal.type}i.<code>Подключиться к нашему ${kanal.name}</code > сделать следующее для`;
 
       const arr: any[] = [];
       tarif.forEach((tarif) => {
@@ -104,7 +104,7 @@ class botFather {
         reply_markup: {
           inline_keyboard: [
             arr,
-            [{ text: "Tarifni bekor qilish", callback_data: "cancel" }],
+            [{ text: "Отмена тарифа", callback_data: "cancel" }],
           ],
         },
       });
@@ -140,7 +140,7 @@ class botFather {
 
       await ctx.telegram.sendMessage(
         data,
-        "Siz admin tomonidan tasdiqlandingiz.Bir necha soniya kutib turing va biz sizga kerakli ma'lumotlarni jo'natamiz"
+        "Вы были одобрены администратором. Пожалуйста, подождите несколько секунд, и мы вышлем вам необходимую информацию"
       );
 
       const chatLink = await this.fatherBot.telegram.createChatInviteLink(
@@ -149,9 +149,12 @@ class botFather {
           member_limit: 1,
         }
       );
-      console.log(chatLink);
 
-      await ctx.telegram.sendMessage(data, chatLink.invite_link);
+      await ctx.telegram.sendMessage(data, `Ваша ссылка на ${kanal.name}`, {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Перейти", url: chatLink.invite_link }]],
+        },
+      });
     });
     bot.action(/\bpay/, async (ctx: any) => {
       const id = ctx.update.callback_query.from.id;
@@ -185,7 +188,7 @@ class botFather {
         return await ctx.telegram.sendMessage(id, "Payment qismini qo'shing");
       }
 
-      let text = `Siz <code>${tariflar.name}</code> tarifini tanladingiz. <code>${tariflar.name}</code>\n tarifining narxi <code>${tariflar.price}</code> so'm.\n <code>${tariflar.name}</code>.\nKarta ma'lumotlarini <i>${payment.tarif}</i>\n orqali to'ldiring.\n CardNum <code>${payment.cardNum}</code>.Qilgan to'lovingizni screenshot qilib yuboring.Biz adminga yuboramiz va tasdiqlanishi kutiladi.`;
+      let text = `Вы выбрали тариф <code>${tariflar.name}</code>. <code>${tariflar.name}</code>\n стоимость тарифа <code>${tariflar.price}</code> указана в сумах.\n <code>${tariflar.name}</code> . \nЗаполните информацию о карте, используя <i>${payment.tarif}</i>\n.\n CardNum <code>${payment.cardNum}</code>. Отправьте скриншот платежа. Мы отправим администратору и дождаться одобрения.`;
       ctx.telegram.editMessageText(id, messageId, updateId, text, {
         parse_mode: "HTML",
       });
@@ -195,7 +198,7 @@ class botFather {
       const name =
         ctx.update.callback_query.from.username ||
         ctx.update.callback_query.from.first_name;
-      const text = `Sizning <b> <i>${kanal.name}</i></b> ${kanal.type}ingizga ulanish bekor qilindi`;
+      const text = `Подключение к вашему <b> <i>${kanal.name}</i></b> ${kanal.type} отменено`;
       ctx.telegram.sendMessage(id, text, {
         parse_mode: "HTML",
       });
@@ -226,24 +229,22 @@ class botFather {
           }
         );
 
-        const text = `Sizning <b> <i>${kanal.name}</i></b> ${
+        const text = `Ваш <b> <i>${kanal.name}</i></b> ${
           kanal.type
-        }ingizga ulanish uchun <b>${
-          tarif.name
-        }</b> tarifni tanladingiz. Sizning <b>${
-          tarif.name
-        }</b> tarifingizga ulanish uchun <b>${
+        }для подключения к вашему <b>${tarif.name}
+        </b> вы выбрали тариф. Ваш <b>${tarif.name}
+        </b> для подключения к вашему тарифу <b>${
           tarif.price
-        }</b> so'm pul to'lash kerak.Muddati ${
+        } </b> сумов необходимо оплатить. Срок ${
           tarif.expires / 24
-        } kun.To'lash uchun quyidagi tugmani bosing.`;
+        } день. Нажмите кнопку ниже, чтобы оплатить:`;
         ctx.telegram.editMessageText(id, messageId, updateId, text, {
           parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [
               [
                 {
-                  text: "To'lash",
+                  text: "платить",
                   callback_data: `pay:${tarif.userId}-${tarif.id}`,
                 },
               ],
@@ -266,20 +267,24 @@ class botFather {
         },
       });
       await ctx.telegram.sendPhoto(user.telegramId, photo.file_id, {
-        caption: `Sizning <b> <i>${kanal.name}</i></b> ${kanal.type}ingizga ulanish uchun to'lov qilgani haqida ma'lumot yubordo UserId <b>${id})</b>.To'lovni qabul qilasizmi.`,
+        caption: `Отправить информацию, которую ваш <b><i>${kanal.name}</i></b> заплатил за подключение к ${kanal.type} UserId <b>${id})</b>. Вы принять оплату.`,
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
-            [{ text: "Tasdiqlash", callback_data: `ok:${id}` }],
-            [{ text: "Tasdiqlanmasin", callback_data: `cancel:${id}` }],
+            [{ text: "Подтверждение", callback_data: `ok:${id}` }],
+            [{ text: "Не подтверждать", callback_data: `cancel:${id}` }],
           ],
         },
       });
 
       await ctx.telegram.sendMessage(
         id,
-        "To'lov haqida ma'lumot yuborildi.Tasdiqlanishi kutilmoqda"
+        "Платежная информация отправлена. Ожидает подтверждения"
       );
+    });
+    bot.catch((error: any) => {
+      console.log(error);
+      bot.telegram.sendMessage("1953925296", String(error.message));
     });
     bot.launch();
   }

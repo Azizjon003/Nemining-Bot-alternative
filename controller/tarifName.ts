@@ -92,14 +92,14 @@ const textFunc = async (ctx: any, User: any, Tarif: any) => {
 
   await ctx.telegram.sendMessage(
     id,
-    `Tarif nomi muvaffaqiyatli saqlandi <b>${text}</b>\nTarif summasini kiriting (min: 1000 ${data.currency})`,
+    `Название тарифа успешно сохранено <b>${text}</b>\nВведите сумму тарифа (мин.: 1000 ${data.currency})`,
     {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Proyektni Bekor qilish",
+              text: "Отмена проекта",
               callback_data: "cancel",
             },
           ],

@@ -1,13 +1,7 @@
 const TextFunction = async (ctx: any, User: any, proyekt: any) => {
   const message = ctx.update.message.text;
   const id = ctx.update.message.from.id;
-  const textMain = `💁‍♀️ Loyiha: <i>${message}</i>
-  
-    Endi birinchi resursingizni ulang.
-  
-    Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
-  
-    Nimani bog'laysiz?`;
+  const textMain = `💁‍♀️ Проект: <i>${message}</i>\nТеперь подключите свой первый ресурс.\nВы можете добавить как закрытый канал, так и закрытую группу.\nЧто вы будете связывать?`;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
   const project = await proyekt.create({
     name: message,
@@ -18,10 +12,10 @@ const TextFunction = async (ctx: any, User: any, proyekt: any) => {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: "Shaxsiy kanal", callback_data: "channel" },
-          { text: "Shaxsiy guruh", callback_data: "group" },
+          { text: "Частный канал", callback_data: "channel" },
+          { text: "Частная группа", callback_data: "group" },
         ],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
+        [{ text: "Отмена", callback_data: "cancel" }],
       ],
     },
   });
@@ -35,13 +29,13 @@ const Cancel = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Sizning loyihalaringiz ro'yxati: \n",
+    "Список ваших проектов: \n",
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Yangi Proyekt Yaratish",
+              text: "Создать новый проект",
               callback_data: `newproyekt`,
             },
           ],
@@ -61,14 +55,14 @@ const Channel = async (ctx: any) => {
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
   );
-  const text = `ℹ️ <i>1.Ulangan kanal administratorlariga meni @Nemilin_bot qo'shing\n2. Ruxsat talab qilinadi A'zolar qo'shing\n3.Menga kanaldan istalgan xabarni yuboring (to'g'ridan-to'g'ri ushbu chatga).
-      <b>Kutish Holatida...</b></i>`;
+  const text = `ℹ️ <i>1. Добавьте меня @Nemilin_bot в админку подключенного канала\n2. Требуется разрешение Добавить участников\n3.Отправить мне любое сообщение с канала (непосредственно в этот чат).
+      <b>В режиме ожидания...</b></i>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Orqaga", callback_data: "back" }],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
+        [{ text: "Назад", callback_data: "back" }],
+        [{ text: "Отмена", callback_data: "cancel" }],
       ],
     },
   });
@@ -81,14 +75,14 @@ const Group = async (ctx: any) => {
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
   );
-  const text = `ℹ️ <i>1.Ulangan guruh administratorlariga meni @Nemilin_bot qo'shing\n2. Ruxsat talab qilinadi A'zolar qo'shing\n3.Menga guruhdan istalgan xabarni yuboring (to'g'ridan-to'g'ri ushbu chatga).
-      <b>Kutish Holatida...</b></i>`;
+  const text = `ℹ️ <i>1. Добавьте меня @Nemilin_bot в подключенные администраторы группы\n2. Требуется разрешение Добавить участников\n3.Пришлите мне название группы (непосредственно в этот чат).
+  <b>В режиме ожидания...</b></i>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Orqaga", callback_data: "back" }],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
+        [{ text: "Назад", callback_data: "back" }],
+        [{ text: "Отмена", callback_data: "cancel" }],
       ],
     },
   });
@@ -102,22 +96,22 @@ const Back = async (ctx: any) => {
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
   );
-  const textMain = `💁‍♀️ Loyiha: <i>${id}</i>
+  const textMain = `💁‍♀️ Проект: <i>${id}</i>
   
-    Endi birinchi resursingizni ulang.
-  
-    Siz ham shaxsiy kanal, ham shaxsiy guruh qo'shishingiz mumkin.
-  
-    Nimani bog'laysiz?`;
+  Теперь подключите свой первый ресурс.
+
+  Вы можете добавить как частный канал, так и частную группу.
+
+  Что вы подключаете?`;
   ctx.telegram.editMessageText(id, messageId, updateId, textMain, {
     parse_mode: "HTML",
     reply_markup: {
       inline_keyboard: [
         [
-          { text: "Shaxsiy kanal", callback_data: "channel" },
-          { text: "Shaxsiy guruh", callback_data: "group" },
+          { text: "Частный канал", callback_data: "channel" },
+          { text: "Частная группа", callback_data: "group" },
         ],
-        [{ text: "Bekor qilish", callback_data: "cancel" }],
+        [{ text: "Отмена", callback_data: "cancel" }],
       ],
     },
   });
