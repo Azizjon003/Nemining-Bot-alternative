@@ -27,6 +27,7 @@ const Options = require("./controller/option");
 const Connections = require("./controller/Connection");
 const Tarifs = require("./controller/tarif");
 const tarifNames = require("./controller/tarifName");
+
 dotenv.config({ path: ".env" });
 require("./model");
 
@@ -89,7 +90,7 @@ proyektOption.action("donat", async (ctx: any) => {
   await proyektOptions.Donat(ctx);
 });
 proyektOption.action("cancel", async (ctx: any) => {
-  await proyektOptions.Cancels(ctx);
+  await proyektOptions.Cancels(ctx, User);
 });
 proyektOption.action(/\btarif/, async (ctx: any) => {
   await proyektOptions.editTarifOption(ctx, User, proyekt, Tarif);
@@ -219,6 +220,21 @@ botConfirm.on("text", async (ctx: any) => {
   return ctx.scene.enter("sceneWizard");
 });
 const editTarifOption = new Composer();
+editTarifOption.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  await ctx.telegram.sendMessage(id, "Siz bosh menyudasiz");
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+  ctx.wizard.selectStep(0);
+});
 editTarifOption.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
@@ -237,11 +253,23 @@ editTarifOption.on("text", async (ctx: any) => {
       }
     );
 
+    await User.update(
+      {
+        editTarif: null,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      }
+    );
+
     await ctx.telegram.sendMessage(
       id,
-      "Tarif nomi muvaffaqiyatli o'zgartirildi"
+      "Tarif nomi muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
     );
-    return ctx.scene.leave();
+
+    return ctx.wizard.selectStep(0);
   }
   if (shart == "price") {
     const tarifId = user.editTarif.split(":")[1];
@@ -259,11 +287,21 @@ editTarifOption.on("text", async (ctx: any) => {
       }
     );
 
+    await User.update(
+      {
+        editTarif: null,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      }
+    );
     await ctx.telegram.sendMessage(
       id,
-      "Tarif narxi muvaffaqiyatli o'zgartirildi"
+      "Tarif narxi muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
     );
-    return ctx.scene.leave();
+    return ctx.wizard.selectStep(0);
   }
   if (shart == "time") {
     const tarifId = user.editTarif.split(":")[1];
@@ -281,14 +319,39 @@ editTarifOption.on("text", async (ctx: any) => {
       }
     );
 
+    await User.update(
+      {
+        editTarif: null,
+      },
+      {
+        where: {
+          id: user.id,
+        },
+      }
+    );
     await ctx.telegram.sendMessage(
       id,
-      "Tarif vaqti muvaffaqiyatli o'zgartirildi"
+      "Tarif vaqti muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
     );
-    return ctx.scene.leave();
+    return ctx.wizard.selectStep(0);
   }
 });
 const editProjectName = new Composer();
+editProjectName.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  await ctx.telegram.sendMessage(id, "Вы находитесь в главном меню");
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+  ctx.wizard.selectStep(0);
+});
 editProjectName.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
@@ -308,9 +371,9 @@ editProjectName.on("text", async (ctx: any) => {
 
   await ctx.telegram.sendMessage(
     id,
-    "Proyekt nomi muvaffaqiyatli o'zgartirildi"
+    "Proyekt nomi muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
   );
-  return ctx.scene.leave();
+  return ctx.wizard.selectStep(0);
 });
 const tolov = new Composer();
 tolov.action("cancel", async (ctx: any) => {

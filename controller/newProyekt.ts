@@ -104,6 +104,12 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
               callback_data: `tarif:${proyekts.id}`,
             },
           ],
+          [
+            {
+              text: "отмена",
+              callback_data: `cancel`,
+            },
+          ],
         ],
       },
     });
@@ -130,6 +136,9 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
 
     ctx.telegram.editMessageText(id, messageId, updateId, txt, {
       parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
+      },
     });
 
     return ctx.wizard.selectStep(11);
@@ -151,6 +160,7 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
             { text: "Активный", callback_data: `true:${proyekts.id}` },
             { text: "Не активный", callback_data: `false:${proyekts.id}` },
           ],
+          [{ text: "Отмена", callback_data: "cancel" }],
         ],
       },
     });
@@ -169,9 +179,9 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       id,
       messageId,
       updateId,
-      "Статус изменен"
+      "Статус изменен.Вы находитесь в главном меню"
     );
-    return ctx.scene.leave();
+    return ctx.scene.selectStep(0);
   }
   if (data.includes("false")) {
     const proyektId = data.split(":")[1];
@@ -187,9 +197,9 @@ const callBackFunc = async (ctx: any, User: any, proyekt: any) => {
       id,
       messageId,
       updateId,
-      "Статус изменен"
+      "Статус изменен.Вы находитесь в главном меню"
     );
-    return ctx.scene.leave();
+    return ctx.scene.selectStep(0);
   }
 };
 const editName = async (ctx: any, User: any, proyekt: any) => {
@@ -263,6 +273,12 @@ const tarifEdit = async (ctx: any, User: any, proyekt: any, Tarif: any) => {
   });
 
   let txt = `Выберите тарифы: `;
+  arr.push([
+    {
+      text: "Отмена",
+      callback_data: "cancel",
+    },
+  ]);
   ctx.telegram.editMessageText(id, messageId, updateId, txt, {
     reply_markup: {
       inline_keyboard: arr,

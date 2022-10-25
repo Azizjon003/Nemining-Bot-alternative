@@ -33,30 +33,29 @@ const Donat = async (ctx: any) => {
   });
   return ctx.wizard.next();
 };
-const Cancels = async (ctx: any) => {
+const Cancels = async (ctx: any, User: any) => {
   // console.log(ctx);
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
   const messageId = ctx.update.callback_query.message?.message_id;
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
   await ctx.telegram.editMessageText(
     id,
     messageId,
     updateId,
-    "Список ваших проектов: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Создать новый проект",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
+    "Вы находитесь в главном меню",
+    {}
   );
-  return ctx.wizard.back();
+  return ctx.wizard.selectStep(0);
 };
 
 const editTarifOption = async (
@@ -72,7 +71,7 @@ const editTarifOption = async (
   const datas = await Tarif.findOne({
     id: data,
   });
-  const text = `Название тарифа <code>${datas?.name}</code>\n Валюта тарифа <code>${datas.currency}</code>\n Срок действия тарифа <code>${datas.expires}</ code >\n Тарифная цена <code>${datas.price}</code>`;
+  const text = `Название тарифа <code>${datas?.name}</code>\n Валюта тарифа <code>${datas.currency}</code>\n Срок действия тарифа <code>${datas.expires}</code>\n Тарифная цена <code>${datas.price}</code>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
     reply_markup: {
@@ -89,6 +88,12 @@ const editTarifOption = async (
           {
             text: "Изменить время",
             callback_data: `time:${datas.id}`,
+          },
+        ],
+        [
+          {
+            text: "Отмена",
+            callback_data: `cancel`,
           },
         ],
       ],
@@ -155,6 +160,9 @@ const editTarifPrice = async (ctx: any, Tarif: any, User: any) => {
   const text = `Введите новую цену\n Текущая цена: <code>${datas.price}</code>`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
+    reply_markup: {
+      inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
+    },
   });
   return ctx.wizard.selectStep(10);
 };
@@ -188,6 +196,9 @@ const editTarifTime = async (ctx: any, Tarif: any, User: any) => {
 
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     parse_mode: "HTML",
+    reply_markup: {
+      inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
+    },
   });
 
   return ctx.wizard.selectStep(10);
