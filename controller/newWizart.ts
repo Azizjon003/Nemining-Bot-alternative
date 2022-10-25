@@ -50,6 +50,12 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
               callback_data: "editproyekt",
             },
           ],
+          [
+            {
+              text: "Bekor qilish",
+              callback_data: "cancel",
+            },
+          ],
         ],
       },
     }
@@ -72,6 +78,7 @@ const Tolovlar = async (ctx: any, User: any, Payment: any) => {
         reply_markup: {
           inline_keyboard: [
             [{ text: "O'zgartirish", callback_data: `update${payment.id}` }],
+            [{ text: "Bekor qilish", callback_data: `cancel` }],
           ],
           remove_keyboard: true,
         },

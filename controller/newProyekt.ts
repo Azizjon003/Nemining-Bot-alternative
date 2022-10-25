@@ -23,12 +23,15 @@ const newProject = async (ctx: any) => {
 
 const xatolar = async (ctx: any) => {
   const id = ctx.update.message.from.id;
+  const messageId = ctx.update.message.message_id;
   const txt = ctx.update.message.text;
   if (txt == "/start") {
     return ctx.scene.leave();
   }
   const text = `Такой команды не существует! Нажмите /start, чтобы создать проект`;
+  await ctx.deleteMessage(messageId);
   await ctx.telegram.sendMessage(id, text, {});
+  return ctx.wizard.selectStep(0);
 };
 
 const editProyekt = async (ctx: any, User: any, proyekt: any) => {
@@ -65,6 +68,8 @@ const editProyekt = async (ctx: any, User: any, proyekt: any) => {
     son++;
   });
   console.log(arr);
+
+  arr.push([{ text: "Bekor Qilish", callback_data: "cancel" }]);
 
   const text = `Введите проект, который вы хотите изменить`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {

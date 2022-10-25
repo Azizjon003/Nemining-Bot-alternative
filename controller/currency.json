@@ -21,6 +21,10 @@
     {
       "text": "🇰🇿 KZT",
       "callback_data": "KZT"
+    },
+    {
+      "text": "🇹🇯 TJS",
+      "callback_data": "TJS"
     }
   ],
   [

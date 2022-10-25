@@ -36,6 +36,13 @@ const bot = new Telegraf(TOKEN);
 
 const newWizart = new Composer();
 
+newWizart.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  await ctx.deleteMessage(messageId);
+  await ctx.telegram.sendMessage(id, "siz bosh menyudasiz");
+  return ctx.wizard.selectStep(0);
+});
 newWizart.hears("Помощь", async (ctx: any) => {
   await newProyekts.Yordam(ctx);
 });
@@ -48,10 +55,17 @@ newWizart.hears("Платежи", async (ctx: any) => {
 newWizart.hears("Настройки", async (ctx) => {
   await newProyekts.Sozlamalar(ctx);
 });
-newWizart.hears(/\b[a-zA-Z0-9]\b/gu, async (ctx: any) => {
+newWizart.hears(/\b[a-zA-Z0-9]/, async (ctx: any) => {
   await xato(ctx);
 });
 const newProyekt = new Composer();
+newProyekt.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const messageId = ctx.update.callback_query.message?.message_id;
+  await ctx.deleteMessage(messageId);
+  await ctx.telegram.sendMessage(id, "siz bosh menyudasiz");
+  return ctx.wizard.selectStep(0);
+});
 newProyekt.action("newproyekt", async (ctx: any) => {
   await newPro.newProject(ctx);
 });
@@ -302,6 +316,16 @@ const tolov = new Composer();
 tolov.action("cancel", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   await ctx.telegram.sendMessage(id, "Siz bosh menyudasiz");
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
   ctx.wizard.selectStep(0);
 });
 tolov.action("kartatarif", async (ctx: any) => {
@@ -321,9 +345,16 @@ tolov.action("kartatarif", async (ctx: any) => {
       },
     }
   );
-  User.update({
-    editTarif: `payment:name`,
-  });
+  User.update(
+    {
+      editTarif: `payment:name`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
 });
 
 tolov.action("kartaraqam", async (ctx: any) => {
@@ -336,18 +367,53 @@ tolov.action("kartaraqam", async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Karta raqamingizni kiriting",
+    "Karta raqaminigzni  kiriting",
     {
       reply_markup: {
         inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
       },
     }
   );
-  User.update({
-    editTarif: `payment:cardNum`,
-  });
+  User.update(
+    {
+      editTarif: `payment:cardNum`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
 });
 
+tolov.action("email", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    " Emailingizni kiriting kiriting",
+    {
+      reply_markup: {
+        inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
+      },
+    }
+  );
+  User.update(
+    {
+      editTarif: "payment:email",
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+});
 tolov.action(/\bupdate/, async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
@@ -372,7 +438,14 @@ tolov.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const shart = user.editTarif.split(":")[0];
+  const shart = user.editTarif?.split(":")[0];
+  if (!shart) {
+    await ctx.telegram.sendMessage(
+      id,
+      "Nimadir xato ketti.Siz bosh menyudasiz"
+    );
+    return ctx.wizard.selectStep(0);
+  }
   if (shart == "payment") {
     const pay = await Payment.findOne({
       where: {
@@ -392,7 +465,20 @@ tolov.on("text", async (ctx: any) => {
             },
           }
         );
-        await ctx.telegram.sendMessage(id, "O'zgartirishlar saqlandi");
+        await ctx.telegram.sendMessage(
+          id,
+          "O'zgartirishlar saqlandi.Siz bosh menyudasiz"
+        );
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
         return ctx.wizard.selectStep(0);
       }
       let payment = await Payment.create({
@@ -431,7 +517,20 @@ tolov.on("text", async (ctx: any) => {
             },
           }
         );
-        await ctx.telegram.sendMessage(id, "O'zgartirishlar saqlandi");
+        await ctx.telegram.sendMessage(
+          id,
+          "O'zgartirishlar saqlandi.Siz bosh menyudasiz"
+        );
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
         return ctx.wizard.selectStep(0);
       }
       let payment = await Payment.update(
@@ -462,6 +561,31 @@ tolov.on("text", async (ctx: any) => {
     }
 
     if (shart1 == "email") {
+      if (pay) {
+        Payment.update(
+          {
+            email: message,
+          },
+          {
+            where: {
+              id: user.paymentId,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(id, "O'zgartirishlar saqlandi");
+
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
+        return ctx.wizard.selectStep(0);
+      }
       let payment = await Payment.update(
         {
           email: message,
@@ -526,7 +650,7 @@ bot.on("my_chat_member", async (ctx: any) => {
   await mychat.mychat(ctx, User, Channel);
 });
 bot.catch((error: any) => {
-  console.log(cli.red(error));
+  console.log(cli.red(error.stack));
   bot.telegram.sendMessage("1953925296", String(error.message));
 });
 console.log("Bot is running");

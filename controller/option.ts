@@ -29,21 +29,9 @@ const Cancel = async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Список ваших проектов: \n",
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Создать новый проект",
-              callback_data: `newproyekt`,
-            },
-          ],
-        ],
-      },
-    }
+    "Вы находитесь в главном меню \n"
   );
-  return ctx.wizard.back().back();
+  return ctx.wizard.selectStep(0);
 
   // ctx.telegram.editMessageReplyMarkup(id,messageId,,);
   // await ctx.deleteMessage();
