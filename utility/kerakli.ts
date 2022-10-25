@@ -5,12 +5,12 @@ const xato = async (ctx: any) => {
     txt == "Помощь" ||
     txt == "Проекты" ||
     txt == "Платежи" ||
-    txt == "Настройки" ||
-    txt == "/start"
+    txt == "Настройки"
+    // txt == "/start"
   ) {
-    return;
+    return ctx.wizard.selectStep(0);
   }
-  const text = `Bunaqa buyruq mavjud emas!`;
+  const text = `Такой команды не существует!`;
   await ctx.telegram.sendMessage(id, text, {});
 };
 

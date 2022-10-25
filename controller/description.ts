@@ -11,7 +11,7 @@ const callBack = async (ctx: any, User: any, Tarif: any, Channel: any) => {
   if (!tarifId) {
     return await ctx.telegram.sendMessage(
       id,
-      "Tarif rejasini yaratishda xatolik yuz berdi"
+      "Произошла ошибка при создании тарифного плана"
     );
   }
   console.log(data);

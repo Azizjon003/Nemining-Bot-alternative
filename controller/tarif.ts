@@ -26,7 +26,7 @@ const calBack = async (ctx: any, User: any, proyekt: any, Tarif: any) => {
       id,
       messageId,
       updateId,
-      "2/5 Tarif nomini kiriting"
+      "2/5 Введите название тарифа"
     );
     return ctx.wizard.next();
   }

@@ -23,6 +23,14 @@ const tarifUser = (sequilize: any, DataTypes: any) => {
           key: "id",
         },
       },
+      proyektId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "proyekt",
+          key: "id",
+        },
+      },
     },
     {
       tableName: "tarifUser",

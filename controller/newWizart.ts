@@ -2,7 +2,7 @@ const Yordam = async (ctx: any) => {
   const id = ctx.update.message.from.id;
   ctx.telegram.sendMessage(
     id,
-    `NEMILIN BOT\n\n<i>Qo'llab-quvvatlash:</i> @Coder_aa\n\n<i>Rasmiy kanal:</i> @musicsnewsuz\n\n<i>Sizning ID raqamingiz:</i> <code>${id}</code>`,
+    `NEMILIN BOT\n\n<i>Поддержка:</i> @Coder_aa\n\n<i>Официальный канал:</i> @musicsnewsuz\n\n<i>Ваш идентификационный номер:</i> <code >${id}</code>`,
     {
       parse_mode: "HTML",
     }
@@ -13,7 +13,7 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
   const id = ctx.update.message.from.id;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
   if (!user) {
-    ctx.telegram.sendMessage(id, `Siz ro'yhatdan o'tmagansiz!`, {
+    ctx.telegram.sendMessage(id, `Вы не зарегистрированы!`, {
       parse_mode: "HTML",
     });
   }
@@ -33,26 +33,26 @@ const Proyektlar = async (ctx: any, User: any, proyekt: any) => {
   }
   await ctx.telegram.sendMessage(
     id,
-    `Sizning loyihalaringiz ro'yxati: <i>${text || ""}</i> \n`,
+    `Список ваших проектов: <i>${text || ""}</i> \n`,
     {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Yangi Proyekt Yaratish",
+              text: "Создать новый проект",
               callback_data: `newproyekt`,
             },
           ],
           [
             {
-              text: "Proyektlarni o'zgartirish",
+              text: "Изменить проекты",
               callback_data: "editproyekt",
             },
           ],
           [
             {
-              text: "Bekor qilish",
+              text: "Отмена",
               callback_data: "cancel",
             },
           ],
@@ -73,12 +73,12 @@ const Tolovlar = async (ctx: any, User: any, Payment: any) => {
   if (payment) {
     await ctx.telegram.sendMessage(
       id,
-      `Sizning to'lov qismingiz mavjud!!!;\nTarifi:${payment.tarif}\nKarta Raqam : ${payment.cardNum}\n Email: ${payment.email}\n`,
+      `Ваш платеж доступен!!!;\n Тарифы:${payment.tarif}\n номер карты: ${payment.cardNum}\n Email: ${payment.email}\n`,
       {
         reply_markup: {
           inline_keyboard: [
-            [{ text: "O'zgartirish", callback_data: `update${payment.id}` }],
-            [{ text: "Bekor qilish", callback_data: `cancel` }],
+            [{ text: "Изменять", callback_data: `update${payment.id}` }],
+            [{ text: "Отмена", callback_data: `cancel` }],
           ],
           remove_keyboard: true,
         },
@@ -86,7 +86,7 @@ const Tolovlar = async (ctx: any, User: any, Payment: any) => {
     );
     return ctx.wizard.selectStep(12);
   }
-  const text = `<i>Biz boshladik.Siz bizga kerakli matnni yuboring.Ya'ni siz o'zingizning<code> karta raqamingiz</code> tarifini kiriting</i>`;
+  const text = `<i> Мы начали.Вы отправляете нам необходимый текст.То есть вводите свой <code>номер карты</code>тариф</i>`;
 
   const upt = await User.update(
     {
@@ -105,7 +105,7 @@ const Tolovlar = async (ctx: any, User: any, Payment: any) => {
 };
 const Sozlamalar = async (ctx: any) => {
   const id = ctx.update.message.from.id;
-  const text = `<i>Sozlamalar bo'limi hozircha ishga tushirilmagan! Yaqin kunlarda ishga tushiramiz</i>`;
+  const text = `<i>Раздел настроек еще не запущен! Запустим в ближайшее время</i>`;
   ctx.telegram.sendMessage(id, text, {
     parse_mode: "HTML",
   });

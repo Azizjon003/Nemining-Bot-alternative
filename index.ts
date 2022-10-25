@@ -41,7 +41,7 @@ newWizart.action("cancel", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const messageId = ctx.update.callback_query.message?.message_id;
   await ctx.deleteMessage(messageId);
-  await ctx.telegram.sendMessage(id, "siz bosh menyudasiz");
+  await ctx.telegram.sendMessage(id, "ты в главном меню");
   return ctx.wizard.selectStep(0);
 });
 newWizart.hears("Помощь", async (ctx: any) => {
@@ -64,7 +64,7 @@ newProyekt.action("cancel", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const messageId = ctx.update.callback_query.message?.message_id;
   await ctx.deleteMessage(messageId);
-  await ctx.telegram.sendMessage(id, "siz bosh menyudasiz");
+  await ctx.telegram.sendMessage(id, "ты в главном меню");
   return ctx.wizard.selectStep(0);
 });
 newProyekt.action("newproyekt", async (ctx: any) => {
@@ -266,7 +266,7 @@ editTarifOption.on("text", async (ctx: any) => {
 
     await ctx.telegram.sendMessage(
       id,
-      "Tarif nomi muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
+      "Название тарифа успешно изменено Вы находитесь в главном меню"
     );
 
     return ctx.wizard.selectStep(0);
@@ -274,7 +274,7 @@ editTarifOption.on("text", async (ctx: any) => {
   if (shart == "price") {
     const tarifId = user.editTarif.split(":")[1];
     if (!Number(message)) {
-      return ctx.telegram.sendMessage(id, "Noto'g'ri qiymat kiritildi");
+      return ctx.telegram.sendMessage(id, "Введено неверное значение");
     }
     const tarifUpdate = await Tarif.update(
       {
@@ -299,14 +299,14 @@ editTarifOption.on("text", async (ctx: any) => {
     );
     await ctx.telegram.sendMessage(
       id,
-      "Tarif narxi muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
+      "Стоимость тарифа успешно изменена Вы находитесь в главном меню"
     );
     return ctx.wizard.selectStep(0);
   }
   if (shart == "time") {
     const tarifId = user.editTarif.split(":")[1];
     if (!Number(message)) {
-      return ctx.telegram.sendMessage(id, "Noto'g'ri qiymat kiritildi");
+      return ctx.telegram.sendMessage(id, "Введено неверное значение");
     }
     const tarifUpdate = await Tarif.update(
       {
@@ -331,7 +331,7 @@ editTarifOption.on("text", async (ctx: any) => {
     );
     await ctx.telegram.sendMessage(
       id,
-      "Tarif vaqti muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
+      "Тарифное время успешно изменено Вы находитесь в главном меню"
     );
     return ctx.wizard.selectStep(0);
   }
@@ -371,14 +371,14 @@ editProjectName.on("text", async (ctx: any) => {
 
   await ctx.telegram.sendMessage(
     id,
-    "Proyekt nomi muvaffaqiyatli o'zgartirildi.Siz bosh menyudasiz"
+    "Название проекта успешно изменено. Вы находитесь в главном меню."
   );
   return ctx.wizard.selectStep(0);
 });
 const tolov = new Composer();
 tolov.action("cancel", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
-  await ctx.telegram.sendMessage(id, "Siz bosh menyudasiz");
+  await ctx.telegram.sendMessage(id, "Вы находитесь в главном меню");
   await User.update(
     {
       editTarif: null,
@@ -401,10 +401,10 @@ tolov.action("kartatarif", async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Karta raqamingizni kiriting",
+    "Введите номер карты",
     {
       reply_markup: {
-        inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
+        inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
       },
     }
   );
@@ -430,7 +430,7 @@ tolov.action("kartaraqam", async (ctx: any) => {
     id,
     messageId,
     updateId,
-    "Karta raqaminigzni  kiriting",
+    "Введите номер карты",
     {
       reply_markup: {
         inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
@@ -459,10 +459,10 @@ tolov.action("email", async (ctx: any) => {
     id,
     messageId,
     updateId,
-    " Emailingizni kiriting kiriting",
+    " Введите адрес электронной почты",
     {
       reply_markup: {
-        inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
+        inline_keyboard: [[{ text: "Отмена", callback_data: "cancel" }]],
       },
     }
   );
@@ -484,14 +484,19 @@ tolov.action(/\bupdate/, async (ctx: any) => {
     ctx.update.callback_query.message?.message_id
   );
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const text = `Qaysi qismini o'zgartirasiz:`;
+  const text = `Какую часть вы меняете:`;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Karta tarifni o'zgartirish", callback_data: "kartatarif" }],
-        [{ text: "Karta raqamini o'zgartirish", callback_data: "kartaraqam" }],
-        [{ text: "Emailingizni o'zgartrish", callback_data: "email" }],
-        [{ text: "Bekor Qilish", callback_data: "cancel" }],
+        [{ text: "Изменение тарифа карты", callback_data: "kartatarif" }],
+        [{ text: "Изменить номер карты", callback_data: "kartaraqam" }],
+        [
+          {
+            text: "Измените свой адрес электронной почты",
+            callback_data: "email",
+          },
+        ],
+        [{ text: "Отмена", callback_data: "cancel" }],
       ],
     },
   });
@@ -505,7 +510,7 @@ tolov.on("text", async (ctx: any) => {
   if (!shart) {
     await ctx.telegram.sendMessage(
       id,
-      "Nimadir xato ketti.Siz bosh menyudasiz"
+      "Что-то пошло не так Вы находитесь в главном меню"
     );
     return ctx.wizard.selectStep(0);
   }
@@ -530,7 +535,7 @@ tolov.on("text", async (ctx: any) => {
         );
         await ctx.telegram.sendMessage(
           id,
-          "O'zgartirishlar saqlandi.Siz bosh menyudasiz"
+          "изменения сохранены. Вы находитесь в главном меню"
         );
         await User.update(
           {
@@ -561,7 +566,7 @@ tolov.on("text", async (ctx: any) => {
 
       await ctx.telegram.sendMessage(
         id,
-        "O'zgarishlar saqlandi Endi Karta ramingizni kiritishingiz kerak",
+        "изменения сохранены. Вы находитесь в главном меню",
         {
           remove_keyboard: true,
         }
@@ -582,7 +587,7 @@ tolov.on("text", async (ctx: any) => {
         );
         await ctx.telegram.sendMessage(
           id,
-          "O'zgartirishlar saqlandi.Siz bosh menyudasiz"
+          "изменения сохранены. Вы находитесь в главном меню"
         );
         await User.update(
           {
@@ -619,7 +624,7 @@ tolov.on("text", async (ctx: any) => {
 
       await ctx.telegram.sendMessage(
         id,
-        "O'zgarishlar saqlandi Endi emailingizni kiritishingiz kerak"
+        "Изменения сохранены Теперь вам нужно ввести свой адрес электронной почты"
       );
     }
 
@@ -635,7 +640,10 @@ tolov.on("text", async (ctx: any) => {
             },
           }
         );
-        await ctx.telegram.sendMessage(id, "O'zgartirishlar saqlandi");
+        await ctx.telegram.sendMessage(
+          id,
+          "Изменения сохранены, вы находитесь в главном меню"
+        );
 
         await User.update(
           {
@@ -675,9 +683,9 @@ tolov.on("text", async (ctx: any) => {
 
       await ctx.telegram.sendMessage(
         id,
-        `O'zgarishlar saqlandi\n 1. Tarif Haqida ${users.tarif} \n 2. Karta raqami ${users.cardNum} \n 3. Emailingiz ${users.email}`
+        `Изменения сохранены\n 1. О тарифе ${users.tarif} \n 2. Номер карты ${users.cardNum} \n 3. Ваш адрес электронной почты ${users.email}`
       );
-      await ctx.telegram.sendMessage(id, "/start buyrug'ini bosing");
+      await ctx.telegram.sendMessage(id, "Вы находитесь в главном меню");
       return ctx.wizard.selectStep(0);
     }
   }

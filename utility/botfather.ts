@@ -25,6 +25,7 @@ const Tarif = db.tarif;
 const Kanal = db.channel;
 const Users = db.user;
 const ConnectUser = db.connectUser;
+const TarifUser = db.tarifUser;
 class botFather {
   token: string;
   fatherBot: any;
@@ -72,6 +73,25 @@ class botFather {
         },
       });
       const text = `Привет. <code>Мой ${kanal.type}</code> <code>${kanal.name}</code> ${kanal.type}i.<code>Подключиться к нашему ${kanal.name}</code > сделать следующее для`;
+      const id = ctx.update.message.from.id;
+
+      const connectUsers = await ConnectUser.findOne({
+        where: {
+          telegramId: id,
+        },
+      });
+      const tarifUse = await TarifUser.findAll({
+        where: {
+          connectUserId: connectUsers?.id,
+          projectId: project.id,
+        },
+      });
+
+      if (tarifUse) {
+        for (let i = 0; i < tarifUse.length; i++) {
+          tarif = tarif.filter((item) => item.id !== tarifUse[i].tarifId);
+        }
+      }
 
       const arr: any[] = [];
       tarif.forEach((tarif) => {
@@ -83,14 +103,8 @@ class botFather {
         arr.push(obj);
       });
 
-      const id = ctx.update.message.from.id;
       const name =
         ctx.update.message.from.username || ctx.update.message.from.first_name;
-      const connectUsers = await ConnectUser.findOne({
-        where: {
-          telegramId: id,
-        },
-      });
       if (!connectUsers) {
         const connectUser = await ConnectUser.create({
           telegramId: id,
@@ -138,6 +152,14 @@ class botFather {
         }
       );
 
+      ctx.telegram.sendMessage(id, "Тариф успешно подключен");
+
+      const tarifUsers = await TarifUser.create({
+        connectUserId: connectUser.id,
+        tarifId: tarif.id,
+        proyektId: tarif.proyektId,
+      });
+
       await ctx.telegram.sendMessage(
         data,
         "Вы были одобрены администратором. Пожалуйста, подождите несколько секунд, и мы вышлем вам необходимую информацию"
@@ -155,6 +177,19 @@ class botFather {
           inline_keyboard: [[{ text: "Перейти", url: chatLink.invite_link }]],
         },
       });
+
+      await ctx.telegram.sendMessage(id, "Пользователь принят");
+    });
+
+    bot.action(/\bban/, async (ctx) => {
+      const id = ctx.update.callback_query.from.id;
+      const data = String(ctx.update.callback_query.data?.split(":")[1]);
+      await ctx.telegram.sendMessage(
+        data,
+        `Ваша ссылка на ${kanal.name}.Is banned`,
+        {}
+      );
+      await ctx.telegram.sendMessage(id, "Пользователь забанен");
     });
     bot.action(/\bpay/, async (ctx: any) => {
       const id = ctx.update.callback_query.from.id;
@@ -272,7 +307,7 @@ class botFather {
         reply_markup: {
           inline_keyboard: [
             [{ text: "Подтверждение", callback_data: `ok:${id}` }],
-            [{ text: "Не подтверждать", callback_data: `cancel:${id}` }],
+            [{ text: "Не подтверждать", callback_data: `ban:${id}` }],
           ],
         },
       });
@@ -289,7 +324,6 @@ class botFather {
     bot.launch();
   }
 }
-
 // new botFather(
 //   "5431137389:AAFraDHaa7CzCAwhj6z9z5sp9_PDtPc3q44",
 //   botFather
