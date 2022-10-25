@@ -37,5 +37,6 @@ db.tarif = require("./tarif")(sequelize, DataTypes);
 db.proyekt = require("./proyekt")(sequelize, DataTypes);
 db.payment = require("./payment")(sequelize, DataTypes);
 db.connectUser = require("./conectUser")(sequelize, DataTypes);
-// db.sequelize.sync({ alter: true, force: true });
+db.tarifUser = require("./tarifUser")(sequelize, DataTypes);
+db.sequelize.sync({ alter: true, force: true });
 module.exports = db;
