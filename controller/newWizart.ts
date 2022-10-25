@@ -65,10 +65,19 @@ const Tolovlar = async (ctx: any, User: any, Payment: any) => {
     },
   });
   if (payment) {
-    return ctx.telegram.sendMessage(
+    await ctx.telegram.sendMessage(
       id,
-      `Sizning to'lov qismingiz mavjud!!!;\nTarifi:${payment.tarif}\nKarta Raqam : ${payment.cardNum}\n Email: ${payment.email}\n`
+      `Sizning to'lov qismingiz mavjud!!!;\nTarifi:${payment.tarif}\nKarta Raqam : ${payment.cardNum}\n Email: ${payment.email}\n`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "O'zgartirish", callback_data: `update${payment.id}` }],
+          ],
+          remove_keyboard: true,
+        },
+      }
     );
+    return ctx.wizard.selectStep(12);
   }
   const text = `<i>Biz boshladik.Siz bizga kerakli matnni yuboring.Ya'ni siz o'zingizning<code> karta raqamingiz</code> tarifini kiriting</i>`;
 

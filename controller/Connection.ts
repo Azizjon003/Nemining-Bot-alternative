@@ -32,7 +32,7 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       const channelData = await Channel.findOne({
         where: { name: forward.title, userId: user.id, activ: true },
       });
-      if (channelData.proyektId) {
+      if (channelData?.proyektId) {
         return await ctx.telegram.sendMessage(
           id,
           "Этот канал подключен к другому проекту, вы можете подключить другой канал"

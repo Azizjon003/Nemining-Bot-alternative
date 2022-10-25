@@ -2,6 +2,7 @@ import { Telegraf, Composer, session, Scenes } from "telegraf";
 import dotenv from "dotenv";
 import cli, { xterm } from "cli-color";
 import fs from "fs";
+import { userInfo } from "os";
 const botFather = require("./utility/botfather");
 const db = require("./model/index");
 const User = db.user;
@@ -298,14 +299,102 @@ editProjectName.on("text", async (ctx: any) => {
   return ctx.scene.leave();
 });
 const tolov = new Composer();
+tolov.action("cancel", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  await ctx.telegram.sendMessage(id, "Siz bosh menyudasiz");
+  ctx.wizard.selectStep(0);
+});
+tolov.action("kartatarif", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Karta raqamingizni kiriting",
+    {
+      reply_markup: {
+        inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
+      },
+    }
+  );
+  User.update({
+    editTarif: `payment:name`,
+  });
+});
+
+tolov.action("kartaraqam", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await ctx.telegram.editMessageText(
+    id,
+    messageId,
+    updateId,
+    "Karta raqamingizni kiriting",
+    {
+      reply_markup: {
+        inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
+      },
+    }
+  );
+  User.update({
+    editTarif: `payment:cardNum`,
+  });
+});
+
+tolov.action(/\bupdate/, async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const user = await User.findOne({ where: { telegramId: id, activ: true } });
+  const text = `Qaysi qismini o'zgartirasiz:`;
+  ctx.telegram.editMessageText(id, messageId, updateId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "Karta tarifni o'zgartirish", callback_data: "kartatarif" }],
+        [{ text: "Karta raqamini o'zgartirish", callback_data: "kartaraqam" }],
+        [{ text: "Emailingizni o'zgartrish", callback_data: "email" }],
+        [{ text: "Bekor Qilish", callback_data: "cancel" }],
+      ],
+    },
+  });
+});
+
 tolov.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
   const shart = user.editTarif.split(":")[0];
   if (shart == "payment") {
+    const pay = await Payment.findOne({
+      where: {
+        id: user.paymentId,
+      },
+    });
     const shart1 = user.editTarif.split(":")[1];
     if (shart1 == "name") {
+      if (pay) {
+        Payment.update(
+          {
+            tarif: message,
+          },
+          {
+            where: {
+              id: user.paymentId,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(id, "O'zgartirishlar saqlandi");
+        return ctx.wizard.selectStep(0);
+      }
       let payment = await Payment.create({
         tarif: message,
       });
@@ -323,11 +412,28 @@ tolov.on("text", async (ctx: any) => {
 
       await ctx.telegram.sendMessage(
         id,
-        "O'zgarishlar saqlandi Endi Karta ramingizni kiritishingiz kerak"
+        "O'zgarishlar saqlandi Endi Karta ramingizni kiritishingiz kerak",
+        {
+          remove_keyboard: true,
+        }
       );
     }
 
     if (shart1 == "cardNum") {
+      if (pay) {
+        Payment.update(
+          {
+            cardNum: message,
+          },
+          {
+            where: {
+              id: user.paymentId,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(id, "O'zgartirishlar saqlandi");
+        return ctx.wizard.selectStep(0);
+      }
       let payment = await Payment.update(
         {
           cardNum: message,
@@ -385,7 +491,7 @@ tolov.on("text", async (ctx: any) => {
         `O'zgarishlar saqlandi\n 1. Tarif Haqida ${users.tarif} \n 2. Karta raqami ${users.cardNum} \n 3. Emailingiz ${users.email}`
       );
       await ctx.telegram.sendMessage(id, "/start buyrug'ini bosing");
-      return ctx.scene.leave();
+      return ctx.wizard.selectStep(0);
     }
   }
 });
