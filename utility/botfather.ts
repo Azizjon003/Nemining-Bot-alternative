@@ -75,15 +75,26 @@ class botFather {
       const text = `Привет. <code>Мой ${kanal.type}</code> <code>${kanal.name}</code> ${kanal.type}i.<code>Подключиться к нашему ${kanal.name}</code > сделать следующее для`;
       const id = ctx.update.message.from.id;
 
-      const connectUsers = await ConnectUser.findOne({
+      let connectUsers = await ConnectUser.findOne({
         where: {
           telegramId: id,
         },
       });
+      const name =
+        ctx.update.message.from.username || ctx.update.message.from.first_name;
+      if (!connectUsers) {
+        connectUsers = await ConnectUser.create({
+          telegramId: id,
+          name: name,
+          proyektId: project.id,
+          channelId: kanal.id,
+        });
+      }
+      console.log(connectUsers);
       const tarifUse = await TarifUser.findAll({
         where: {
           connectUserId: connectUsers?.id,
-          projectId: project.id,
+          proyektId: project.id,
         },
       });
 
@@ -103,16 +114,6 @@ class botFather {
         arr.push(obj);
       });
 
-      const name =
-        ctx.update.message.from.username || ctx.update.message.from.first_name;
-      if (!connectUsers) {
-        const connectUser = await ConnectUser.create({
-          telegramId: id,
-          name: name,
-          proyektId: project.id,
-          channelId: kanal.id,
-        });
-      }
       ctx.telegram.sendMessage(id, text, {
         parse_mode: "HTML",
         reply_markup: {

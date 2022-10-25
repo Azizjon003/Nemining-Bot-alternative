@@ -11,7 +11,7 @@ const tarifUser = (sequilize: any, DataTypes: any) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "connectUser",
+          model: "connectusers",
           key: "id",
         },
       },

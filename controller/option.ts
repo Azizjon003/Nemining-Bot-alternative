@@ -3,10 +3,24 @@ const TextFunction = async (ctx: any, User: any, proyekt: any) => {
   const id = ctx.update.message.from.id;
   const textMain = `💁‍♀️ Проект: <i>${message}</i>\nТеперь подключите свой первый ресурс.\nВы можете добавить как закрытый канал, так и закрытую группу.\nЧто вы будете связывать?`;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const project = await proyekt.create({
-    name: message,
-    userId: user.id,
-  });
+  if (user.editTarif == null) {
+    const project = await proyekt.create({
+      name: message,
+      userId: user.id,
+    });
+    await User.update(
+      {
+        editTarif: project.id,
+      },
+      {
+        where: {
+          telegramId: id,
+        },
+      }
+    );
+  } else {
+    return await ctx.telegram.sendMessage(id, "Вы уже создали проект");
+  }
   await ctx.telegram.sendMessage(id, textMain, {
     parse_mode: "HTML",
     reply_markup: {
@@ -19,12 +33,23 @@ const TextFunction = async (ctx: any, User: any, proyekt: any) => {
       ],
     },
   });
+  return;
 };
-const Cancel = async (ctx: any) => {
+const Cancel = async (ctx: any, User: any) => {
   // console.log(ctx);
   const id = ctx.update.callback_query.from.id;
   const updateId = ctx.update.callback_query.id;
   const messageId = ctx.update.callback_query.message?.message_id;
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
   await ctx.telegram.editMessageText(
     id,
     messageId,
@@ -37,11 +62,22 @@ const Cancel = async (ctx: any) => {
   // await ctx.deleteMessage();
 };
 
-const Channel = async (ctx: any) => {
+const Channel = async (ctx: any, User: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
+  );
+
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
   );
   const text = `ℹ️ <i>1. Добавьте меня @Nemilin_bot в админку подключенного канала\n2. Требуется разрешение Добавить участников\n3.Отправить мне любое сообщение с канала (непосредственно в этот чат).
       <b>В режиме ожидания...</b></i>`;
@@ -57,11 +93,21 @@ const Channel = async (ctx: any) => {
   // console.log(ctx.stage);
   return ctx.wizard.next({});
 };
-const Group = async (ctx: any) => {
+const Group = async (ctx: any, User: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
+  );
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
   );
   const text = `ℹ️ <i>1. Добавьте меня @Nemilin_bot в подключенные администраторы группы\n2. Требуется разрешение Добавить участников\n3.Пришлите мне название группы (непосредственно в этот чат).
   <b>В режиме ожидания...</b></i>`;
@@ -78,11 +124,22 @@ const Group = async (ctx: any) => {
   return ctx.wizard.next({});
 };
 
-const Back = async (ctx: any) => {
+const Back = async (ctx: any, User: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
   const messageId: number = Number(
     ctx.update.callback_query.message?.message_id
+  );
+
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
   );
   const textMain = `💁‍♀️ Проект: <i>${id}</i>
   

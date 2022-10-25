@@ -54,7 +54,7 @@ const callBack = async (ctx: any) => {
       },
     });
   }
-  // return ctx.wizard.next();
+  return ctx.wizard.selectStep(13);
 };
 module.exports = {
   newTarif,

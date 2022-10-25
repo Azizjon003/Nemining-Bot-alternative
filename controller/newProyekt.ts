@@ -4,17 +4,17 @@ const newProject = async (ctx: any) => {
 
   const id = ctx.update.callback_query.from.id;
 
-  const text = `💁🏻‍♂️ Siz qanday loyiha yaratmoqchisiz?\n- Pulli obuna: shaxsiy kanal yoki guruhingizga pullik obunani tashkil qilish\n- Donat: Donat qabul qilishni tashkil etish`;
+  const text = `💁🏻‍♂️ Какой проект вы хотите создать?\n- Платная подписка: организуйте платную подписку на свой личный канал или группу\n- Пожертвование: организуйте получение пожертвования`;
 
   ctx.telegram.callB;
   ctx.telegram.editMessageText(id, messageId, updateId, text, {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: "Pulli obuna", callback_data: "money" },
-          { text: "Donat", callback_data: "donat" },
+          { text: "Платная подписка", callback_data: "money" },
+          { text: "Данат", callback_data: "donat" },
         ],
-        [{ text: "Obunani Bekor qilish", callback_data: "cancel" }],
+        [{ text: "Отмена", callback_data: "cancel" }],
       ],
     },
   });

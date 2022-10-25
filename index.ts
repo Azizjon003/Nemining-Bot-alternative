@@ -117,16 +117,16 @@ option.on("text", async (ctx: any) => {
   await Options.TextFunction(ctx, User, proyekt);
 });
 option.action("cancel", async (ctx: any) => {
-  await Options.Cancel(ctx);
+  await Options.Cancel(ctx, User);
 });
 option.action("channel", async (ctx: any) => {
-  await Options.Channel(ctx);
+  await Options.Channel(ctx, User);
 });
 
 option.action("group", async (ctx: any) => {
-  await Options.Group(ctx);
+  await Options.Group(ctx, User);
 });
-option.action("back", async (ctx: any) => {
+option.action("back", async (ctx: any, User) => {
   await Options.Back(ctx);
 });
 
@@ -180,45 +180,6 @@ botConfirm.on("callback_query", async (ctx: any) => {
   await botConfirms.callBack(ctx);
 });
 
-botConfirm.on("text", async (ctx: any) => {
-  const id = ctx.update.message.from.id;
-  const message = ctx.update.message.text;
-  try {
-    // console.log(message);
-    const botullo = new botFather(message, bot);
-    botullo.start();
-
-    const user = await User.findOne({ where: { telegramId: id, activ: true } });
-    console.log(user);
-    const project = await proyekt.findAll({
-      where: { userId: user.id },
-      order: [["createdAt", "DESC"]],
-    });
-    console.log(project);
-
-    const projectId = project[0].dataValues.id;
-    const projectUpdate = await proyekt.update(
-      {
-        token: message,
-      },
-      {
-        where: {
-          id: projectId,
-        },
-      }
-    );
-
-    await ctx.telegram.sendMessage(
-      id,
-      "Bot tokeni muvaffaqiyatli saqlandi",
-      {}
-    );
-  } catch (e) {
-    return await ctx.telegram.sendMessage(id, "Bot tokeni noto'g'ri kiritildi");
-  }
-
-  return ctx.scene.enter("sceneWizard");
-});
 const editTarifOption = new Composer();
 editTarifOption.action("cancel", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
@@ -690,7 +651,46 @@ tolov.on("text", async (ctx: any) => {
     }
   }
 });
+const botAdd = new Composer();
+botAdd.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+  const message = ctx.update.message.text;
+  try {
+    // console.log(message);
+    const botullo = new botFather(message, bot);
+    botullo.start();
 
+    const user = await User.findOne({ where: { telegramId: id, activ: true } });
+    console.log(user);
+    const project = await proyekt.findAll({
+      where: { userId: user.id },
+      order: [["createdAt", "DESC"]],
+    });
+    console.log(project);
+
+    const projectId = project[0].dataValues.id;
+    const projectUpdate = await proyekt.update(
+      {
+        token: message,
+      },
+      {
+        where: {
+          id: projectId,
+        },
+      }
+    );
+
+    await ctx.telegram.sendMessage(
+      id,
+      "Bot tokeni muvaffaqiyatli saqlandi",
+      {}
+    );
+  } catch (e) {
+    return await ctx.telegram.sendMessage(id, "Bot tokeni noto'g'ri kiritildi");
+  }
+
+  return ctx.scene.enter("sceneWizard");
+});
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
   newWizart,
@@ -705,7 +705,8 @@ const menuSchema: any = new Scenes.WizardScene(
   botConfirm,
   editTarifOption,
   editProjectName,
-  tolov
+  tolov,
+  botAdd
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);
