@@ -37,7 +37,7 @@ const User = (sequelize: any, DataTypes: any) => {
       },
     },
     {
-      tableName: "user",
+      tableName: "users",
     }
   );
   return user;

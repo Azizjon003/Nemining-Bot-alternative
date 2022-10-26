@@ -2,7 +2,7 @@ const Yordam = async (ctx: any) => {
   const id = ctx.update.message.from.id;
   ctx.telegram.sendMessage(
     id,
-    `NEMILIN BOT\n\n<i>Поддержка:</i> @Coder_aa\n\n<i>Официальный канал:</i> @musicsnewsuz\n\n<i>Ваш идентификационный номер:</i> <code >${id}</code>`,
+    `Bot\n\n<i>Поддержка:</i> @Coder_aa\n\n<i>Официальный канал:</i> @musicsnewsuz\n\n<i>Ваш идентификационный номер:</i> <code >${id}</code>`,
     {
       parse_mode: "HTML",
     }
@@ -110,9 +110,50 @@ const Sozlamalar = async (ctx: any) => {
     parse_mode: "HTML",
   });
 };
+const Admin = async (ctx: any, User: any, proyekt: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+
+  const text =
+    "Использовать права администратора Просматривать пользователей Отключать или включать пользователей Просматривать статистику";
+
+  ctx.telegram.editMessageText(id, messageId, updateId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "Просмотр пользователей", callback_data: "users" }],
+        [{ text: "Просмотр статистики", callback_data: "stat" }],
+        [{ text: "Заблокировать пользователя", callback_data: "banuser" }],
+        [
+          {
+            text: "Открытый пользователь в активном состоянии",
+            callback_data: "adduser",
+          },
+        ],
+        [
+          {
+            text: "Добавить администратора",
+            callback_data: "addAdmin",
+          },
+        ],
+        [
+          {
+            text: "Удалить администратора",
+            callback_data: "banAdmin",
+          },
+        ],
+      ],
+    },
+  });
+
+  return ctx.wizard.selectStep(14);
+};
 module.exports = {
   Yordam,
   Proyektlar,
   Tolovlar,
   Sozlamalar,
+  Admin,
 };

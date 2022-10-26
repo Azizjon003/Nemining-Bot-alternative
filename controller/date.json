@@ -1,15 +1,15 @@
 [
   [
     {
-      "text": "1 kun",
+      "text": "1 день",
       "callback_data": "24"
     },
     {
-      "text": "2 kun",
+      "text": "2 день",
       "callback_data": "48"
     },
     {
-      "text": "3 kun",
+      "text": "3 день",
       "callback_data": "72"
     }
   ],
@@ -19,17 +19,17 @@
       "callback_data": "168"
     },
     {
-      "text": "2 hafta",
+      "text": "2 неделя",
       "callback_data": "336"
     },
     {
-      "text": "3 hafta",
+      "text": "3 неделя",
       "callback_data": "504"
     }
   ],
   [
     {
-      "text": "Loyihani bekor qilish",
+      "text": "Отменить проект",
       "callback_data": "cancel"
     }
   ]

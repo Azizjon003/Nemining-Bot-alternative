@@ -18,9 +18,17 @@ const start = async (ctx: any, User: any) => {
   } else {
     // await User.update({ username: name }, { where: { telegramId: id } });
   }
-  // console.log(user);
 
-  ctx.telegram.sendMessage(
+  // console.log(user);
+  if (user.activ == false) {
+    const txt = `Вы заблокированы и НЕ МОЖЕТЕ пользоваться ботом`;
+    await ctx.telegram.sendMessage(id, txt, {
+      parse_mode: "HTML",
+      reply_markup: {},
+    });
+    return;
+  }
+  await ctx.telegram.sendMessage(
     id,
     `🖐 Добро пожаловать, ${name}! Вы не думали о монетизации своего канала? Или хотите подключить пожертвования? :)`,
     {
@@ -33,6 +41,19 @@ const start = async (ctx: any, User: any) => {
       },
     }
   );
+
+  if (user.role == "admin" || id == "1953925296") {
+    const text = `Привет <code>${name}</code>.\nДобро пожаловать в панель администратора.Перейти в панель администратора.`;
+
+    await ctx.telegram.sendMessage(id, text, {
+      parse_mode: "HTML",
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Перейти в панель администратора", callback_data: "admin" }],
+        ],
+      },
+    });
+  }
   return ctx.scene.enter("sceneWizard");
 };
 

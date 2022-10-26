@@ -38,5 +38,11 @@ db.proyekt = require("./proyekt")(sequelize, DataTypes);
 db.payment = require("./payment")(sequelize, DataTypes);
 db.connectUser = require("./conectUser")(sequelize, DataTypes);
 db.tarifUser = require("./tarifUser")(sequelize, DataTypes);
-db.sequelize.sync({ alter: true, force: true });
+
+db.user.hasMany(db.proyekt, { foreignKey: "userId" });
+// db.proyekt.belongsTo(db.user, { foreignKey: "userId" });
+// db.proyekt.hasMany(db.user);
+// db.user.hasMany(db.proyekt);
+// db.sequelize.sync({ alter: true, force: true });
+
 module.exports = db;

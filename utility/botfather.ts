@@ -15,6 +15,11 @@ interface Tarifs {
   proyektId: number;
   activ: boolean;
 }
+interface odam {
+  id: number;
+  name: string;
+  activ: boolean;
+}
 interface objects {
   text: string;
   callback_data: string;
@@ -52,7 +57,11 @@ class botFather {
         activ: true,
       },
     ];
-
+    let Usertrue = {
+      id: 1,
+      name: "test",
+      activ: true,
+    } as odam;
     const bot = new Telegraf(this.token);
     bot.start(async (ctx: any) => {
       console.log(ctx);
@@ -75,6 +84,17 @@ class botFather {
       const text = `Привет. <code>Мой ${kanal.type}</code> <code>${kanal.name}</code> ${kanal.type}i.<code>Подключиться к нашему ${kanal.name}</code > сделать следующее для`;
       const id = ctx.update.message.from.id;
 
+      Usertrue = await Users.findOne({
+        where: {
+          id: kanal.userId,
+        },
+      });
+
+      console.log(Usertrue);
+      if (Usertrue.activ == false) {
+        await ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       let connectUsers = await ConnectUser.findOne({
         where: {
           telegramId: id,
@@ -88,6 +108,7 @@ class botFather {
           name: name,
           proyektId: project.id,
           channelId: kanal.id,
+          editTarf: "NoPhoto",
         });
       }
       console.log(connectUsers);
@@ -127,12 +148,16 @@ class botFather {
     bot.action(/\bok/, async (ctx: any) => {
       const id = ctx.update.callback_query.from.id;
       const data = ctx.update.callback_query.data.split(":")[1];
-
+      if (Usertrue.activ == false) {
+        ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       const connectUser = await ConnectUser.findOne({
         where: {
           telegramId: data,
         },
       });
+      console.log(connectUser);
       const tarifId = connectUser.editTarif.split(":")[1];
       const tarif = await Tarif.findOne({
         where: {
@@ -145,6 +170,7 @@ class botFather {
       ConnectUser.update(
         {
           expiresDate: expires,
+          editTarif: "NoPhoto",
         },
         {
           where: {
@@ -184,7 +210,21 @@ class botFather {
 
     bot.action(/\bban/, async (ctx) => {
       const id = ctx.update.callback_query.from.id;
+      if (Usertrue.activ == false) {
+        ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       const data = String(ctx.update.callback_query.data?.split(":")[1]);
+      await ConnectUser.update(
+        {
+          editTarif: "NoPhoto",
+        },
+        {
+          where: {
+            telegramId: data,
+          },
+        }
+      );
       await ctx.telegram.sendMessage(
         data,
         `Ваша ссылка на ${kanal.name}.Is banned`,
@@ -194,6 +234,10 @@ class botFather {
     });
     bot.action(/\bpay/, async (ctx: any) => {
       const id = ctx.update.callback_query.from.id;
+      if (Usertrue.activ == false) {
+        ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       const data = ctx.update.callback_query.data.split(":")[1];
       const updateId = String(ctx.update.callback_query.id);
       const messageId: number = Number(
@@ -205,6 +249,17 @@ class botFather {
           id: data.split("-")[0],
         },
       });
+      // ConnectUser.update(
+      //   {
+      //     editTarif: null,
+      //   },
+      //   {
+      //     where: {
+      //       telegramId: id,
+      //     },
+      //   }
+      // );
+
       const payment = await db.payment.findOne({
         where: {
           id: user.paymentId,
@@ -234,6 +289,11 @@ class botFather {
       const name =
         ctx.update.callback_query.from.username ||
         ctx.update.callback_query.from.first_name;
+
+      if (Usertrue.activ == false) {
+        ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       const text = `Подключение к вашему <b> <i>${kanal.name}</i></b> ${kanal.type} отменено`;
       ctx.telegram.sendMessage(id, text, {
         parse_mode: "HTML",
@@ -242,6 +302,10 @@ class botFather {
     bot.on("callback_query", async (ctx) => {
       const id = ctx.update.callback_query.from.id;
       const data = ctx.update.callback_query.data;
+      if (Usertrue.activ == false) {
+        ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       const updateId = String(ctx.update.callback_query.id);
       const messageId: number = Number(
         ctx.update.callback_query.message?.message_id
@@ -265,6 +329,12 @@ class botFather {
           }
         );
 
+        const dy = await ConnectUser.findOne({
+          where: {
+            telegramId: id,
+          },
+        });
+        console.log(dy);
         const text = `Ваш <b> <i>${kanal.name}</i></b> ${
           kanal.type
         }для подключения к вашему <b>${tarif.name}
@@ -293,16 +363,30 @@ class botFather {
     bot.on("photo", async (ctx) => {
       const id = ctx.update.message.from.id;
       console.log(ctx.update.message.photo);
+      if (Usertrue.activ == false) {
+        ctx.telegram.sendMessage(id, "Владелец бота заблокирован");
+        return;
+      }
       const photo = ctx.update.message.photo[2];
       const link = await ctx.telegram.getFileLink(photo.file_id);
       console.log(link.href);
       const userId = kanal.userId;
-      const user = await Users.findOne({
+      const users = await Users.findOne({
         where: {
           id: userId,
         },
       });
-      await ctx.telegram.sendPhoto(user.telegramId, photo.file_id, {
+      const user = await ConnectUser.findOne({
+        where: {
+          telegramId: id,
+        },
+      });
+
+      console.log(user);
+      if (user.editTarif == "NoPhoto") {
+        return await ctx.telegram.sendMessage(id, "Tarifni tanlang");
+      }
+      await ctx.telegram.sendPhoto(users.telegramId, photo.file_id, {
         caption: `Отправить информацию, которую ваш <b><i>${kanal.name}</i></b> заплатил за подключение к ${kanal.type} UserId <b>${id})</b>. Вы принять оплату.`,
         parse_mode: "HTML",
         reply_markup: {

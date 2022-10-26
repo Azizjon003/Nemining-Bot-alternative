@@ -1,4 +1,5 @@
 import { Telegraf, Composer, session, Scenes } from "telegraf";
+import axios from "axios";
 import dotenv from "dotenv";
 import cli, { xterm } from "cli-color";
 import fs from "fs";
@@ -56,7 +57,10 @@ newWizart.hears("Платежи", async (ctx: any) => {
 newWizart.hears("Настройки", async (ctx) => {
   await newProyekts.Sozlamalar(ctx);
 });
-newWizart.hears(/\b[a-zA-Z0-9]/, async (ctx: any) => {
+newWizart.action("admin", async (ctx: any) => {
+  await newProyekts.Admin(ctx, User);
+});
+newWizart.hears(/\b(?!start)\w+\b/, async (ctx: any) => {
   await xato(ctx);
 });
 const newProyekt = new Composer();
@@ -147,6 +151,10 @@ const tarif = new Composer();
 tarif.on("callback_query", async (ctx: any) => {
   await Tarifs.calBack(ctx, User, proyekt, Tarif);
 });
+tarif.on("text", async (ctx: any) => {
+  const messageId: number = Number(ctx.message.message_id);
+  await ctx.deleteMessage(messageId);
+});
 
 const tarifName = new Composer();
 tarifName.on("text", async (ctx: any) => {
@@ -167,6 +175,10 @@ const descript = require("./controller/description.ts");
 description.on("callback_query", async (ctx: any) => {
   await descript.callBack(ctx, User, Tarif, Channel);
 });
+description.on("text", async (ctx: any) => {
+  const messageId: number = Number(ctx.message.message_id);
+  await ctx.deleteMessage(messageId);
+});
 
 const botConfirm = new Composer();
 const botConfirms = require("./controller/botConfirm");
@@ -178,6 +190,10 @@ botConfirm.action("cancel", async (ctx: any) => {
 });
 botConfirm.on("callback_query", async (ctx: any) => {
   await botConfirms.callBack(ctx);
+});
+botConfirm.on("text", async (ctx: any) => {
+  const messageId: number = Number(ctx.message.message_id);
+  await ctx.deleteMessage(messageId);
 });
 
 const editTarifOption = new Composer();
@@ -394,7 +410,7 @@ tolov.action("kartaraqam", async (ctx: any) => {
     "Введите номер карты",
     {
       reply_markup: {
-        inline_keyboard: [[{ text: "bekor Qilish", callback_data: "cancel" }]],
+        inline_keyboard: [[{ text: "Otmena", callback_data: "cancel" }]],
       },
     }
   );
@@ -525,13 +541,9 @@ tolov.on("text", async (ctx: any) => {
         }
       );
 
-      await ctx.telegram.sendMessage(
-        id,
-        "изменения сохранены. Вы находитесь в главном меню",
-        {
-          remove_keyboard: true,
-        }
-      );
+      await ctx.telegram.sendMessage(id, "Введите номер карты", {
+        remove_keyboard: true,
+      });
     }
 
     if (shart1 == "cardNum") {
@@ -656,7 +668,12 @@ botAdd.on("text", async (ctx: any) => {
   const id = ctx.update.message.from.id;
   const message = ctx.update.message.text;
   try {
-    // console.log(message);
+    const url = `https://api.telegram.org/bot${message}/getMe`;
+    const res = await axios.get(url);
+    const data = res.data.ok;
+    if (!data) {
+      return await ctx.telegram.sendMessage(id, "Токен бота поддельный");
+    }
     const botullo = new botFather(message, bot);
     botullo.start();
 
@@ -682,15 +699,422 @@ botAdd.on("text", async (ctx: any) => {
 
     await ctx.telegram.sendMessage(
       id,
-      "Bot tokeni muvaffaqiyatli saqlandi",
+      "Создан новый бот.\nИз этого бота вы можете поделиться с пользователями которые хотят присоединиться к вашему каналу.\nНажимаете запустить бота.\nИ вы увидите остальные",
       {}
     );
   } catch (e) {
     return await ctx.telegram.sendMessage(id, "Bot tokeni noto'g'ri kiritildi");
   }
 
-  return ctx.scene.enter("sceneWizard");
+  return ctx.wizard.selectStep(0);
 });
+
+const admin = new Composer();
+admin.action("back", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  const text =
+    "Использовать права администратора Просматривать пользователей Отключать или включать пользователей Просматривать статистику";
+  await User.update(
+    {
+      editTarif: null,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+  ctx.telegram.editMessageText(id, messageId, updateId, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "Просмотр пользователей", callback_data: "users" }],
+        [{ text: "Просмотр статистики", callback_data: "stat" }],
+        [{ text: "Заблокировать пользователя", callback_data: "banuser" }],
+      ],
+    },
+  });
+});
+admin.action("users", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+
+  const usersData = await User.findAll({
+    order: [["createdAt", "DESC"]],
+  });
+  let kattaTxt = `Foydalanuvchilar ro'yhati:`;
+  usersData.forEach(
+    (el: {
+      id: string;
+      username: string;
+      telegramId: string;
+      role: string;
+      activ: boolean;
+    }) => {
+      let txt = `Id : <code>${el.id}</code>\t Name:<code>${
+        el.username
+      }</code>\t TelegramId:<code>${el.telegramId}</code> \t role :<i>${
+        el.role
+      }</i>\t activ:<b>${String(el.activ)}</b>`;
+      console.log(txt);
+      kattaTxt = kattaTxt + "\n" + txt + "\n";
+    }
+  );
+
+  await ctx.telegram.sendMessage(id, kattaTxt, {
+    parse_mode: "HTML",
+  });
+});
+bot.action("stat", async (ctx: any) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+
+  const dateToday = new Date().getTime() - 86400 * 1000;
+  console.log(dateToday);
+  const projectStat = await proyekt.findAll({
+    where: {
+      createdAt: { [db.Op.gte]: dateToday },
+    },
+  });
+  console.log(projectStat);
+  const users = await User.findAll();
+  const kanal = await Channel.findAll();
+
+  const txt = `Statistikalar:\nOxirgi yaratilgan proyektlar Soni:<i>${projectStat.length}</i>\n,Foydalanuvchilar Soni: <i>${users.length}</i>.\nBot ulangan Kanallar: <i>${kanal.length}</i>\n `;
+
+  await ctx.telegram.sendMessage(id, txt, {
+    parse_mode: "HTML",
+  });
+});
+
+admin.action("banuser", async (ctx) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await User.update(
+    {
+      editTarif: `banUser`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+
+  await ctx.telegram.sendMessage(id, "Введите идентификатор пользователя", {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Назад",
+            callback_data: "back",
+          },
+        ],
+      ],
+    },
+  });
+});
+
+admin.action("adduser", async (ctx) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await User.update(
+    {
+      editTarif: `addUser`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+
+  await ctx.telegram.sendMessage(id, "Введите идентификатор пользователя", {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Назад",
+            callback_data: "back",
+          },
+        ],
+      ],
+    },
+  });
+});
+
+admin.action("addAdmin", async (ctx) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await User.update(
+    {
+      editTarif: `addadmin`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+
+  await ctx.telegram.sendMessage(id, "Введите идентификатор пользователя", {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Назад",
+            callback_data: "back",
+          },
+        ],
+      ],
+    },
+  });
+});
+admin.action("banAdmin", async (ctx) => {
+  const id = ctx.update.callback_query.from.id;
+  const updateId = String(ctx.update.callback_query.id);
+  const messageId: number = Number(
+    ctx.update.callback_query.message?.message_id
+  );
+  await User.update(
+    {
+      editTarif: `banadmin`,
+    },
+    {
+      where: {
+        telegramId: id,
+      },
+    }
+  );
+
+  await ctx.telegram.sendMessage(id, "Введите идентификатор пользователя", {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "Назад",
+            callback_data: "back",
+          },
+        ],
+      ],
+    },
+  });
+});
+admin.on("text", async (ctx: any) => {
+  const id = ctx.update.message.from.id;
+
+  const user = await User.findOne({
+    where: {
+      telegramId: id,
+    },
+  });
+
+  const message = await ctx.message.text;
+  const data = user.editTarif;
+  if (data == "banUser") {
+    if (Number(message)) {
+      const user = await User.findOne({
+        where: {
+          id: message,
+        },
+      });
+
+      if (!user) {
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(
+          id,
+          "Пользователь активен, вы находитесь на главной странице"
+        );
+        return;
+      }
+
+      await User.update(
+        {
+          activ: false,
+        },
+        {
+          where: {
+            id: message,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        id,
+        "Пользователь заблокирован Вы находитесь в главном меню"
+      );
+      return ctx.scene.leave();
+    }
+    await ctx.telegram.sendMessage(id, "Введите число");
+    return;
+  }
+
+  if (data == "addUser") {
+    if (Number(message)) {
+      const user = await User.findOne({
+        where: {
+          id: message,
+        },
+      });
+      if (!user) {
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(
+          id,
+          "Пользователь активен, вы находитесь на главной странице"
+        );
+        return;
+      }
+
+      await User.update(
+        {
+          activ: true,
+        },
+        {
+          where: {
+            id: message,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        id,
+        "Пользователь активен, вы находитесь на главной странице"
+      );
+      return ctx.scene.leave();
+    }
+    await ctx.telegram.sendMessage(id, "Введите число");
+    return;
+  }
+
+  if (data == "addadmin") {
+    if (Number(message)) {
+      const user = await User.findOne({
+        where: {
+          id: message,
+        },
+      });
+      if (!user) {
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(
+          id,
+          "Этот пользователь не существует. Повторите попытку. Нажмите Запретить пользователя еще раз."
+        );
+        return;
+      }
+
+      await User.update(
+        {
+          role: "admin",
+        },
+        {
+          where: {
+            id: message,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        id,
+        "Пользователь активен, вы находитесь на главной странице"
+      );
+      return ctx.scene.leave();
+    }
+    await ctx.telegram.sendMessage(id, "Введите число");
+    return;
+  }
+
+  if (data == "banadmin") {
+    if (Number(message)) {
+      const user = await User.findOne({
+        where: {
+          id: message,
+        },
+      });
+      if (!user) {
+        await User.update(
+          {
+            editTarif: null,
+          },
+          {
+            where: {
+              telegramId: id,
+            },
+          }
+        );
+        await ctx.telegram.sendMessage(
+          id,
+          "Этот пользователь не существует. Повторите попытку. Нажмите Запретить пользователя еще раз."
+        );
+        return;
+      }
+
+      await User.update(
+        {
+          role: "user",
+        },
+        {
+          where: {
+            id: message,
+          },
+        }
+      );
+
+      await ctx.telegram.sendMessage(
+        id,
+        "Пользователь активен, вы находитесь на главной странице"
+      );
+      return ctx.scene.leave();
+    }
+    await ctx.telegram.sendMessage(id, "Введите число");
+    return;
+  }
+});
+
 const menuSchema: any = new Scenes.WizardScene(
   "sceneWizard",
   newWizart,
@@ -706,7 +1130,8 @@ const menuSchema: any = new Scenes.WizardScene(
   editTarifOption,
   editProjectName,
   tolov,
-  botAdd
+  botAdd,
+  admin
 );
 
 const stage: any = new Scenes.Stage([menuSchema]);

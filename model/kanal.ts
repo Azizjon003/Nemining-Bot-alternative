@@ -24,7 +24,7 @@ const channel = (sequelize: any, DataTypes: any) => {
         type: DataTypes.BIGINT,
         allowNull: false,
         refrences: {
-          model: "user",
+          model: "users",
           key: "id",
         },
       },

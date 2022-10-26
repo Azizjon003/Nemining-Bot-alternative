@@ -27,7 +27,7 @@ const tarif = (sequelize: any, DataTypes: any) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "user",
+          model: "users",
           key: "id",
         },
       },
