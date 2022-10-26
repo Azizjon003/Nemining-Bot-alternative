@@ -40,6 +40,7 @@ db.connectUser = require("./conectUser")(sequelize, DataTypes);
 db.tarifUser = require("./tarifUser")(sequelize, DataTypes);
 
 db.user.hasMany(db.proyekt, { foreignKey: "userId" });
+db.connectUser.belongsTo(db.channel, { foreignKey: "channelId" });
 // db.proyekt.belongsTo(db.user, { foreignKey: "userId" });
 // db.proyekt.hasMany(db.user);
 // db.user.hasMany(db.proyekt);

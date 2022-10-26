@@ -29,6 +29,11 @@ const connectUser = (sequelize: any, DataTypes: any) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    activ: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: true,
+    },
     proyektId: {
       type: DataTypes.INTEGER,
       allowNull: false,

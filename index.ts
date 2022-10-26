@@ -2,6 +2,7 @@ import { Telegraf, Composer, session, Scenes } from "telegraf";
 import axios from "axios";
 import dotenv from "dotenv";
 import cli, { xterm } from "cli-color";
+import cron from "node-cron";
 import fs from "fs";
 import { userInfo } from "os";
 const botFather = require("./utility/botfather");
@@ -11,6 +12,7 @@ const proyekt = db.proyekt;
 const Tarif = db.tarif;
 const Payment = db.payment;
 const Channel = db.channel;
+const connectUser = db.connectUser;
 const xato = require("./utility/kerakli");
 interface forward_from {
   id: bigint;
@@ -35,6 +37,10 @@ require("./model");
 const TOKEN = String(process.env.TOKEN);
 
 const bot = new Telegraf(TOKEN);
+
+// ...
+
+// Backup a database at 11:59 PM every day.
 
 const newWizart = new Composer();
 
@@ -1143,6 +1149,32 @@ bot.start(async (ctx: any) => {
 });
 const mychat = require("./controller/mychat");
 
+cron.schedule("59 23 * * *", async function () {
+  const Nowdate = new Date().getTime();
+  const connectUsers = await connectUser.findAll({
+    where: {
+      activ: true,
+      expiresDate: { [db.Op.lte]: Nowdate },
+    },
+    inlude: [
+      {
+        model: db.channel,
+      },
+    ],
+  });
+
+  for (let i = 0; i < connectUsers.length; i++) {
+    const element = connectUsers[i].dataValues;
+    const id = element.channel.dataValues.telegramId;
+    const KanalId = element.channel.dataValues.telegramId;
+
+    const shart1 = await bot.telegram.banChatMember(id, KanalId);
+    if (shart1) {
+      await connectUser.update({ activ: false }, { where: { id: element.id } });
+      const shart2 = await bot.telegram.unbanChatMember(id, KanalId);
+    }
+  }
+});
 bot.on("my_chat_member", async (ctx: any) => {
   await mychat.mychat(ctx, User, Channel);
 });
@@ -1150,5 +1182,6 @@ bot.catch((error: any) => {
   console.log(cli.red(error.stack));
   bot.telegram.sendMessage("1953925296", String(error.message));
 });
+// zerikkanFunksiya();
 console.log("Bot is running");
 bot.launch();

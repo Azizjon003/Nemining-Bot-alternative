@@ -171,6 +171,7 @@ class botFather {
         {
           expiresDate: expires,
           editTarif: "NoPhoto",
+          activ: true,
         },
         {
           where: {
