@@ -19,6 +19,7 @@ interface odam {
   id: number;
   name: string;
   activ: boolean;
+  telegramId: string;
 }
 interface objects {
   text: string;
@@ -61,6 +62,7 @@ class botFather {
       id: 1,
       name: "test",
       activ: true,
+      telegramId: `12311212546`,
     } as odam;
     const bot = new Telegraf(this.token);
     bot.start(async (ctx: any) => {
@@ -277,12 +279,31 @@ class botFather {
         return await ctx.telegram.sendMessage(id, "Tarif topilmadi");
       }
       if (!payment) {
-        return await ctx.telegram.sendMessage(id, "Payment qismini qo'shing");
+        return await ctx.telegram.sendMessage(
+          Usertrue.telegramId,
+          "Payment qismini qo'shing"
+        );
       }
 
       let text = `Вы выбрали тариф <code>${tariflar.name}</code>. <code>${tariflar.name}</code>\n стоимость тарифа <code>${tariflar.price}</code> указана в сумах.\n <code>${tariflar.name}</code> . \nЗаполните информацию о карте, используя <i>${payment.tarif}</i>\n.\n CardNum <code>${payment.cardNum}</code>. Отправьте скриншот платежа. Мы отправим администратору и дождаться одобрения.`;
       ctx.telegram.editMessageText(id, messageId, updateId, text, {
         parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "Душанбе Сити. номер телефона 926300209",
+                callback_data: "card:1-1",
+              },
+            ],
+            [
+              {
+                text: "Алиф кошелек. номер кошелька.",
+                callback_data: "card:1-2",
+              },
+            ],
+          ],
+        },
       });
     });
     bot.action("cancel", async (ctx) => {
