@@ -6,7 +6,10 @@ const callBack = async (ctx: any, User: any, Tarif: any, Channel: any) => {
   );
   const data = ctx.update.callback_query.data;
   const user = await User.findOne({ where: { telegramId: id, activ: true } });
-  const tarifOp = await Tarif.findAll({ where: { userId: user.id } });
+  const tarifOp = await Tarif.findAll({
+    where: { userId: user.id },
+    order: [["createdAt", "DESC"]],
+  });
   const tarifId = tarifOp[0].dataValues.id;
   if (!tarifId) {
     return await ctx.telegram.sendMessage(

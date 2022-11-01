@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import cli, { xterm } from "cli-color";
 import cron from "node-cron";
 import fs from "fs";
-import { userInfo } from "os";
 const botFather = require("./utility/botfather");
 const db = require("./model/index");
 const User = db.user;
@@ -777,7 +776,7 @@ admin.action("users", async (ctx: any) => {
     parse_mode: "HTML",
   });
 });
-bot.action("stat", async (ctx: any) => {
+admin.action("stat", async (ctx: any) => {
   const id = ctx.update.callback_query.from.id;
   const updateId = String(ctx.update.callback_query.id);
   const messageId: number = Number(

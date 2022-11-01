@@ -5,6 +5,7 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
   const messageId = ctx.update.message.message_id;
   const forward = ctx.update.message.forward_from_chat;
   const text = ctx.update.message.text;
+  console.log(forward);
   if (forward) {
     if (forward.username) {
       await ctx.deleteMessage(messageId);
@@ -32,6 +33,7 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       const channelData = await Channel.findOne({
         where: { name: forward.title, userId: user.id, activ: true },
       });
+      console.log(channelData);
       if (channelData?.proyektId) {
         return await ctx.telegram.sendMessage(
           id,
@@ -51,6 +53,8 @@ const TextFunc = async (ctx: any, User: any, proyekt: any, Channel: any) => {
       const data = await Channel.findOne({
         where: { name: forward.title },
       });
+
+      console.log(data);
       if (data) {
         await ctx.telegram.sendMessage(
           id,
